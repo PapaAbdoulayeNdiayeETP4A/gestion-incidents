@@ -1,0 +1,45 @@
+# Fichiers et dossiers spécifiques à l'IDE
+.idea/           # IntelliJ IDEA
+.settings/       # Eclipse
+nbproject/      # NetBeans
+
+# Fichiers compilés
+*.class
+*.jar
+*.war
+*.ear
+
+# Répertoires de build
+target/
+build/
+out/
+
+# Fichiers de log
+*.log
+
+# Fichiers de configuration sensibles
+application.properties  # Fichier de configuration de l'application
+*.properties.bak       # Copies de sauvegarde des fichiers de configuration
+
+# Fichiers temporaires
+*~
+\#*
+*.tmp
+*.swp
+
+# Fichiers système
+.DS_Store        # macOS
+Thumbs.db        # Windows
+
+# Fichiers spécifiques à phpMyAdmin (si vous ne voulez pas les versionner)
+config.inc.php
+
+# Fichiers spécifiques à Apache (si vous ne voulez pas les versionner)
+httpd.conf
+
+# Dossier contenant les librairies (si elles sont gérées par Maven)
+lib/
+
+# Fichiers créés par Maven
+.mvn/
+*.iml
