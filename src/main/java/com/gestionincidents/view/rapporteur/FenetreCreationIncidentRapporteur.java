@@ -1,0 +1,95 @@
+package com.gestionincidents.view.rapporteur;
+
+import com.gestionincidents.controller.IncidentController;
+import com.gestionincidents.model.*;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.List;
+
+public class FenetreCreationIncidentRapporteur extends JFrame {
+
+    private Utilisateur rapporteur;
+    private IncidentController incidentController;
+
+    public FenetreCreationIncidentRapporteur(Utilisateur rapporteur) throws SQLException {
+        this.rapporteur = rapporteur;
+        try {
+            this.incidentController = new IncidentController();
+        } catch (SQLException | IOException e) {
+            JOptionPane.showMessageDialog(this, "Erreur lors de l'initialisation du contrôleur d'incidents : " + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+            dispose();
+            return;
+        }
+
+        setTitle("Création d'un Incident (Rapporteur)");
+        setSize(600, 400);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        JPanel panneauPrincipal = new JPanel();
+        panneauPrincipal.setLayout(new GridLayout(0, 2));
+        add(panneauPrincipal);
+
+        // Champs du formulaire
+        JLabel labelApplication = new JLabel("Application concernée :");
+        JComboBox<String> comboApplication = new JComboBox<>();
+        try {
+            List<Application> applications = incidentController.getAllApplications();
+            for (Application app : applications) {
+                comboApplication.addItem(app.getNom());
+            }
+        } catch (SQLException | IOException e) {
+            JOptionPane.showMessageDialog(this, "Erreur lors de la récupération des applications : " + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+            dispose();
+            return;
+        }
+        JLabel labelDescription = new JLabel("Description :");
+        JTextArea champDescription = new JTextArea();
+        JLabel labelPriorite = new JLabel("Priorité :");
+        JComboBox<Priorite> comboPriorite = new JComboBox<>();
+        comboPriorite.addItem(Priorite.FAIBLE);
+        comboPriorite.addItem(Priorite.MOYENNE);
+        comboPriorite.addItem(Priorite.ELEVEE);
+        comboPriorite.addItem(Priorite.URGENTE);
+        JButton boutonCreer = new JButton("Créer");
+
+        // Ajout des composants au panneau
+        panneauPrincipal.add(labelApplication);
+        panneauPrincipal.add(comboApplication);
+        panneauPrincipal.add(labelDescription);
+        panneauPrincipal.add(new JScrollPane(champDescription));
+        panneauPrincipal.add(labelPriorite);
+        panneauPrincipal.add(comboPriorite);
+        panneauPrincipal.add(new JLabel());
+        panneauPrincipal.add(boutonCreer);
+
+        // Gestion des événements
+        boutonCreer.addActionListener(e -> {
+            String applicationNom = (String) comboApplication.getSelectedItem();
+            String description = champDescription.getText();
+            Priorite priorite = (Priorite) comboPriorite.getSelectedItem();
+
+            Application application = new Application();
+            application.setNom(applicationNom);
+
+            Incident incident = new Incident();
+            incident.setApplicationConcernee(application);
+            incident.setDescription(description);
+            incident.setDateCreation(new Date());
+            incident.setDateModification(new Date());
+            incident.setPriorite(priorite);
+            incident.setStatut(Statut.OUVERT);
+            incident.setRapporteur(rapporteur);
+
+            incidentController.createIncident(incident);
+			JOptionPane.showMessageDialog(FenetreCreationIncidentRapporteur.this, "Incident créé avec succès !");
+			dispose();
+        });
+
+        setVisible(true);
+    }
+}
