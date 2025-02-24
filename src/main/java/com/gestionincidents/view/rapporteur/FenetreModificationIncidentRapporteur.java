@@ -7,22 +7,24 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FenetreModificationIncidentRapporteur extends JFrame {
 
+    private static final long serialVersionUID = 1L;
     private Incident incident;
-    private IncidentController incidentController;
-
     private JComboBox<String> comboApplication;
     private JTextArea champDescription;
     private JComboBox<Priorite> comboPriorite;
     private JComboBox<Statut> comboStatut;
+    private Map<String, Integer> applicationMap;
 
     public FenetreModificationIncidentRapporteur(int incidentId, IncidentController incidentController) throws SQLException {
-        this.incidentController = incidentController;
         this.incident = incidentController.getIncident(incidentId);
+        applicationMap = new HashMap<>();
 
         setTitle("Modification d'un Incident");
         setSize(600, 400);
@@ -39,6 +41,7 @@ public class FenetreModificationIncidentRapporteur extends JFrame {
             List<Application> applications = incidentController.getAllApplications();
             for (Application app : applications) {
                 comboApplication.addItem(app.getNom());
+                applicationMap.put(app.getNom(), app.getId());
             }
             comboApplication.setSelectedItem(incident.getApplicationConcernee().getNom());
         } catch (SQLException | IOException e) {
@@ -69,19 +72,38 @@ public class FenetreModificationIncidentRapporteur extends JFrame {
 
         boutonModifier.addActionListener(e -> {
             String applicationNom = (String) comboApplication.getSelectedItem();
+            int applicationId = applicationMap.get(applicationNom);
             String description = champDescription.getText();
             Priorite priorite = (Priorite) comboPriorite.getSelectedItem();
             Statut statut = (Statut) comboStatut.getSelectedItem();
 
-            incident.getApplicationConcernee().setNom(applicationNom);
+            try {
+                // Récupérer l'objet Application à partir de la liste des applications
+                List<Application> applications = incidentController.getAllApplications();
+                Application applicationSelectionnee = applications.stream()
+                        .filter(app -> app.getId() == applicationId)
+                        .findFirst()
+                        .orElse(null);
+
+                if (applicationSelectionnee != null) {
+                    incident.setApplicationConcernee(applicationSelectionnee);
+                } else {
+                    JOptionPane.showMessageDialog(FenetreModificationIncidentRapporteur.this, "Application non trouvée.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            } catch (SQLException | IOException ex) {
+                JOptionPane.showMessageDialog(FenetreModificationIncidentRapporteur.this, "Erreur lors de la récupération de l'application : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             incident.setDescription(description);
-            incident.setDateModification(new Date());
+            incident.setDateModification(LocalDateTime.now());
             incident.setPriorite(priorite);
             incident.setStatut(statut);
 
             incidentController.updateIncident(incident);
-			JOptionPane.showMessageDialog(FenetreModificationIncidentRapporteur.this, "Incident modifié avec succès !");
-			dispose();
+            JOptionPane.showMessageDialog(FenetreModificationIncidentRapporteur.this, "Incident modifié avec succès !");
+            dispose();
         });
 
         setVisible(true);

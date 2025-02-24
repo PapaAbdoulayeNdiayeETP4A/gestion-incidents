@@ -31,7 +31,7 @@ public class IncidentDAO {
                 "u_rapporteur.id AS rapporteur_id, u_rapporteur.nom AS rapporteur_nom, u_rapporteur.email AS rapporteur_email, u_rapporteur.role AS rapporteur_role, " +
                 "u_assigne.id AS assigne_id, u_assigne.nom AS assigne_nom, u_assigne.email AS assigne_email, u_assigne.role AS assigne_role " +
                 "FROM incident i " +
-                "INNER JOIN application a ON i.application_concernee_nom = a.nom " +
+                "INNER JOIN application a ON i.application_concernee_id = a.id " +
                 "INNER JOIN utilisateur u_rapporteur ON i.rapporteur_id = u_rapporteur.id " +
                 "LEFT JOIN utilisateur u_assigne ON i.assigne_a_id = u_assigne.id"; // LEFT JOIN pour gérer les incidents non assignés
 
@@ -41,7 +41,7 @@ public class IncidentDAO {
                 Incident incident = new Incident();
                 incident.setId(resultSet.getInt("id"));
                 incident.setDescription(resultSet.getString("description"));
-                incident.setDateCreation(resultSet.getTimestamp("date_signalement"));
+                incident.setDateCreation(resultSet.getTimestamp("date_signalement").toLocalDateTime()); // Conversion LocalDateTime
 
                 String prioriteStr = resultSet.getString("priorite");
                 incident.setPriorite(Priorite.valueOf(prioriteStr));
@@ -82,7 +82,7 @@ public class IncidentDAO {
                 "u_rapporteur.id AS rapporteur_id, u_rapporteur.nom AS rapporteur_nom, u_rapporteur.email AS rapporteur_email, u_rapporteur.role AS rapporteur_role, " +
                 "u_assigne.id AS assigne_id, u_assigne.nom AS assigne_nom, u_assigne.email AS assigne_email, u_assigne.role AS assigne_role " +
                 "FROM incident i " +
-                "INNER JOIN application a ON i.application_concernee_nom = a.nom " +
+                "INNER JOIN application a ON i.application_concernee_id = a.id " +
                 "INNER JOIN utilisateur u_rapporteur ON i.rapporteur_id = u_rapporteur.id " +
                 "LEFT JOIN utilisateur u_assigne ON i.assigne_a_id = u_assigne.id " +
                 "WHERE i.id = ?";
@@ -94,7 +94,7 @@ public class IncidentDAO {
                     Incident incident = new Incident();
                     incident.setId(resultSet.getInt("id"));
                     incident.setDescription(resultSet.getString("description"));
-                    incident.setDateCreation(resultSet.getTimestamp("date_signalement"));
+                    incident.setDateCreation(resultSet.getTimestamp("date_signalement").toLocalDateTime()); // Conversion LocalDateTime
                     incident.setPriorite(Priorite.valueOf(resultSet.getString("priorite")));
                     incident.setStatut(Statut.valueOf(resultSet.getString("statut")));
 
@@ -126,13 +126,13 @@ public class IncidentDAO {
     }
 
     public void createIncident(Incident incident) throws SQLException {
-        String sql = "INSERT INTO incident (description, date_signalement, priorite, statut, application_concernee_nom, rapporteur_id, assigne_a_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO incident (description, date_signalement, priorite, statut, application_concernee_id, rapporteur_id, assigne_a_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, incident.getDescription());
-            statement.setTimestamp(2, new Timestamp(incident.getDateCreation().getTime()));
+            statement.setTimestamp(2, Timestamp.valueOf(incident.getDateCreation())); // Conversion LocalDateTime to Timestamp
             statement.setString(3, incident.getPriorite().name());
             statement.setString(4, incident.getStatut().name());
-            statement.setString(5, incident.getApplicationConcernee().getNom());
+            statement.setInt(5, incident.getApplicationConcernee().getId());
             statement.setInt(6, incident.getRapporteur().getId());
             if (incident.getAssigneA() != null) {
                 statement.setInt(7, incident.getAssigneA().getId());
@@ -144,12 +144,12 @@ public class IncidentDAO {
     }
 
     public void updateIncident(Incident incident) throws SQLException {
-        String sql = "UPDATE incident SET description = ?, priorite = ?, statut = ?, application_concernee_nom = ?, rapporteur_id = ?, assigne_a_id = ? WHERE id = ?";
+        String sql = "UPDATE incident SET description = ?, priorite = ?, statut = ?, application_concernee_id = ?, rapporteur_id = ?, assigne_a_id = ? WHERE id = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, incident.getDescription());
             statement.setString(2, incident.getPriorite().name());
             statement.setString(3, incident.getStatut().name());
-            statement.setString(4, incident.getApplicationConcernee().getNom());
+            statement.setInt(4, incident.getApplicationConcernee().getId());
             statement.setInt(5, incident.getRapporteur().getId());
             if (incident.getAssigneA() != null) {
                 statement.setInt(6, incident.getAssigneA().getId());

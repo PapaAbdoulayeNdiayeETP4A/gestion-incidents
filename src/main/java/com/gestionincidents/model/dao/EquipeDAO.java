@@ -1,8 +1,6 @@
 package com.gestionincidents.model.dao;
 
 import com.gestionincidents.model.Equipe;
-import com.gestionincidents.model.Developpeur;
-import com.gestionincidents.model.Application;
 import com.gestionincidents.utils.ConnexionBD;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,11 +32,12 @@ public class EquipeDAO {
                 equipe.setId(resultat.getInt("id"));
                 equipe.setNom(resultat.getString("nom"));
 
-                List<Developpeur> developpeurs = getDeveloppeurs(connexion, equipe.getId());
-                equipe.setMembres(developpeurs);
+                // Gestion des membres et applications déplacée vers DAO/Controller.
+                // List<Developpeur> developpeurs = getDeveloppeurs(connexion, equipe.getId());
+                // equipe.setMembres(developpeurs);
 
-                List<Application> applications = getApplications(connexion, equipe.getId());
-                equipe.setApplications(applications);
+                // List<Application> applications = getApplications(connexion, equipe.getId());
+                // equipe.setApplications(applications);
 
                 equipes.add(equipe);
             }
@@ -48,7 +47,6 @@ public class EquipeDAO {
         } catch (SQLException | IOException e) {
             logger.error("Erreur lors de la récupération des équipes : " + e.getMessage());
             throw e;
-
         }
 
         return equipes;
@@ -68,11 +66,12 @@ public class EquipeDAO {
                 equipe.setId(resultat.getInt("id"));
                 equipe.setNom(resultat.getString("nom"));
 
-                List<Developpeur> developpeurs = getDeveloppeurs(connexion, equipe.getId());
-                equipe.setMembres(developpeurs);
+                // Gestion des membres et applications déplacée vers DAO/Controller.
+                // List<Developpeur> developpeurs = getDeveloppeurs(connexion, equipe.getId());
+                // equipe.setMembres(developpeurs);
 
-                List<Application> applications = getApplications(connexion, equipe.getId());
-                equipe.setApplications(applications);
+                // List<Application> applications = getApplications(connexion, equipe.getId());
+                // equipe.setApplications(applications);
 
                 return equipe;
             } else {
@@ -130,39 +129,40 @@ public class EquipeDAO {
         }
     }
 
-    private List<Developpeur> getDeveloppeurs(Connection connexion, int equipeId) throws SQLException {
-        List<Developpeur> developpeurs = new ArrayList<>();
-        String sql = "SELECT u.id, u.nom, u.email FROM utilisateur u WHERE u.equipe_id = ?";
-        PreparedStatement statement = connexion.prepareStatement(sql);
-        statement.setInt(1, equipeId);
-        ResultSet resultat = statement.executeQuery();
-
-        while (resultat.next()) {
-            Developpeur developpeur = new Developpeur();
-            developpeur.setId(resultat.getInt("id"));
-            developpeur.setNom(resultat.getString("nom"));
-            developpeur.setEmail(resultat.getString("email"));
-            developpeurs.add(developpeur);
-        }
-
-        return developpeurs;
-    }
-
-    private List<Application> getApplications(Connection connexion, int equipeId) throws SQLException {
-        List<Application> applications = new ArrayList<>();
-        String sql = "SELECT a.nom, a.description, a.version FROM application a WHERE a.equipe_responsable_id = ?";
-        PreparedStatement statement = connexion.prepareStatement(sql);
-        statement.setInt(1, equipeId);
-        ResultSet resultat = statement.executeQuery();
-
-        while (resultat.next()) {
-            Application application = new Application();
-            application.setNom(resultat.getString("nom"));
-            application.setDescription(resultat.getString("description"));
-            application.setVersion(resultat.getString("version"));
-            applications.add(application);
-        }
-
-        return applications;
-    }
+    // Gestion des membres et applications déplacée vers DAO/Controller.
+    // private List<Developpeur> getDeveloppeurs(Connection connexion, int equipeId) throws SQLException {
+    //     List<Developpeur> developpeurs = new ArrayList<>();
+    //     String sql = "SELECT u.id, u.nom, u.email FROM utilisateur u WHERE u.equipe_id = ?";
+    //     PreparedStatement statement = connexion.prepareStatement(sql);
+    //     statement.setInt(1, equipeId);
+    //     ResultSet resultat = statement.executeQuery();
+    //
+    //     while (resultat.next()) {
+    //         Developpeur developpeur = new Developpeur();
+    //         developpeur.setId(resultat.getInt("id"));
+    //         developpeur.setNom(resultat.getString("nom"));
+    //         developpeur.setEmail(resultat.getString("email"));
+    //         developpeurs.add(developpeur);
+    //     }
+    //
+    //     return developpeurs;
+    // }
+    //
+    // private List<Application> getApplications(Connection connexion, int equipeId) throws SQLException {
+    //     List<Application> applications = new ArrayList<>();
+    //     String sql = "SELECT a.nom, a.description, a.version FROM application a WHERE a.equipe_responsable_id = ?";
+    //     PreparedStatement statement = connexion.prepareStatement(sql);
+    //     statement.setInt(1, equipeId);
+    //     ResultSet resultat = statement.executeQuery();
+    //
+    //     while (resultat.next()) {
+    //         Application application = new Application();
+    //         application.setNom(resultat.getString("nom"));
+    //         application.setDescription(resultat.getString("description"));
+    //         application.setVersion(resultat.getString("version"));
+    //         applications.add(application);
+    //     }
+    //
+    //     return applications;
+    // }
 }

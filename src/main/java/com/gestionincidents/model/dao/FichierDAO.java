@@ -13,8 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Timestamp;
 
 public class FichierDAO {
 
@@ -47,14 +46,9 @@ public class FichierDAO {
                 if (fichier != null) {
                     fichier.setId(resultat.getInt("id"));
                     fichier.setNom(resultat.getString("nom"));
-                    fichier.setDateUpload(resultat.getDate("date_upload"));
+                    fichier.setDateUpload(resultat.getTimestamp("date_upload").toLocalDateTime()); // Conversion en LocalDateTime
 
-                    Utilisateur uploader = new Utilisateur() {
-                        @Override
-                        public String getRole() {
-                            return null;
-                        }
-                    };
+                    Utilisateur uploader = new Utilisateur();
                     uploader.setId(resultat.getInt("uploader_id"));
                     uploader.setNom(resultat.getString("uploader_nom"));
                     fichier.setUploader(uploader);
@@ -66,7 +60,6 @@ public class FichierDAO {
         } catch (SQLException | IOException e) {
             logger.error("Erreur lors de la récupération du fichier : " + e.getMessage());
             throw e;
-
         }
 
         return fichier;
@@ -92,7 +85,7 @@ public class FichierDAO {
             }
 
             statement.setString(1, fichier.getNom());
-            statement.setDate(2, new java.sql.Date(fichier.getDateUpload().getTime()));
+            statement.setTimestamp(2, Timestamp.valueOf(fichier.getDateUpload())); // Conversion en Timestamp
             statement.setInt(3, fichier.getUploader().getId());
             statement.setString(4, fichier.getClass().getSimpleName().replace("Fichier", "").toLowerCase()); // Récupère le type (trace ou image)
 
@@ -125,7 +118,7 @@ public class FichierDAO {
             }
 
             statement.setString(1, fichier.getNom());
-            statement.setDate(2, new java.sql.Date(fichier.getDateUpload().getTime()));
+            statement.setTimestamp(2, Timestamp.valueOf(fichier.getDateUpload())); // Conversion en Timestamp
             statement.setInt(3, fichier.getUploader().getId());
             statement.setInt(5, fichier.getId());
 

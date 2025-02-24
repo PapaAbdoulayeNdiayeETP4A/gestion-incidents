@@ -24,7 +24,7 @@ public class ApplicationDAO {
 
         try {
             connexion = ConnexionBD.getConnection();
-            String sql = "SELECT a.nom, a.description, a.version, a.equipe_responsable_id, e.nom AS equipe_nom " +
+            String sql = "SELECT a.id, a.nom, a.description, a.version, a.equipe_responsable_id, e.nom AS equipe_nom " +
                     "FROM application a " +
                     "INNER JOIN equipe e ON a.equipe_responsable_id = e.id";
             PreparedStatement statement = connexion.prepareStatement(sql);
@@ -32,6 +32,7 @@ public class ApplicationDAO {
 
             while (resultat.next()) {
                 Application application = new Application();
+                application.setId(resultat.getInt("id")); // Récupérer l'ID
                 application.setNom(resultat.getString("nom"));
                 application.setDescription(resultat.getString("description"));
                 application.setVersion(resultat.getString("version"));
@@ -49,7 +50,6 @@ public class ApplicationDAO {
         } catch (SQLException | IOException e) {
             logger.error("Erreur lors de la récupération des applications : " + e.getMessage());
             throw e;
-
         }
 
         return applications;
@@ -59,7 +59,7 @@ public class ApplicationDAO {
         Connection connexion = null;
         try {
             connexion = ConnexionBD.getConnection();
-            String sql = "SELECT a.nom, a.description, a.version, a.equipe_responsable_id, e.nom AS equipe_nom " +
+            String sql = "SELECT a.id, a.nom, a.description, a.version, a.equipe_responsable_id, e.nom AS equipe_nom " +
                     "FROM application a " +
                     "INNER JOIN equipe e ON a.equipe_responsable_id = e.id " +
                     "WHERE a.nom = ?";
@@ -69,6 +69,7 @@ public class ApplicationDAO {
 
             if (resultat.next()) {
                 Application application = new Application();
+                application.setId(resultat.getInt("id")); // Récupérer l'ID
                 application.setNom(resultat.getString("nom"));
                 application.setDescription(resultat.getString("description"));
                 application.setVersion(resultat.getString("version"));
@@ -135,6 +136,40 @@ public class ApplicationDAO {
             logger.info("Application supprimée : " + nom);
         } catch (SQLException | IOException e) {
             logger.error("Erreur lors de la suppression de l'application " + nom + " : " + e.getMessage());
+            throw e;
+        }
+    }
+
+    public Application getApplicationById(int id) throws SQLException, IOException {
+        Connection connexion = null;
+        try {
+            connexion = ConnexionBD.getConnection();
+            String sql = "SELECT a.id, a.nom, a.description, a.version, a.equipe_responsable_id, e.nom AS equipe_nom " +
+                    "FROM application a " +
+                    "INNER JOIN equipe e ON a.equipe_responsable_id = e.id " +
+                    "WHERE a.id = ?";
+            PreparedStatement statement = connexion.prepareStatement(sql);
+            statement.setInt(1, id);
+            ResultSet resultat = statement.executeQuery();
+
+            if (resultat.next()) {
+                Application application = new Application();
+                application.setId(resultat.getInt("id"));
+                application.setNom(resultat.getString("nom"));
+                application.setDescription(resultat.getString("description"));
+                application.setVersion(resultat.getString("version"));
+
+                Equipe equipe = new Equipe();
+                equipe.setId(resultat.getInt("equipe_responsable_id"));
+                equipe.setNom(resultat.getString("equipe_nom"));
+                application.setEquipeResponsable(equipe);
+
+                return application;
+            } else {
+                return null;
+            }
+        } catch (SQLException | IOException e) {
+            logger.error("Erreur lors de la récupération de l'application par ID " + id + " : " + e.getMessage());
             throw e;
         }
     }

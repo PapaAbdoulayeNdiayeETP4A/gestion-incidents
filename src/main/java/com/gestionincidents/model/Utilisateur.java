@@ -6,12 +6,13 @@ public class Utilisateur {
     private String nom;
     private String email;
     private String motDePasse;
-    private String role;
+    private String role; // Role est géré dans cette table
 
     public Utilisateur() {
     }
 
-    public Utilisateur(String nom, String email, String motDePasse, String role) {
+    public Utilisateur(int id, String nom, String email, String motDePasse, String role) {
+        this.id = id;
         this.nom = nom;
         this.email = email;
         this.motDePasse = motDePasse;

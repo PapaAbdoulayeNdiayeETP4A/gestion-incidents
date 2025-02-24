@@ -9,19 +9,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class FenetreCreationCommentaire extends JFrame {
 
-    private CommentaireController commentaireController;
-    private int incidentId;
-    private Utilisateur utilisateur;
-
-    public FenetreCreationCommentaire(int incidentId, Utilisateur utilisateur, CommentaireController commentaireController) throws SQLException, IOException {
-        this.incidentId = incidentId;
-        this.utilisateur = utilisateur;
-        this.commentaireController = commentaireController;
-
+	private static final long serialVersionUID = 1L;
+	public FenetreCreationCommentaire(int incidentId, Utilisateur utilisateur, CommentaireController commentaireController) throws SQLException, IOException {
         setTitle("Ajouter un Commentaire");
         setSize(400, 200);
         setLocationRelativeTo(null);
@@ -42,7 +35,7 @@ public class FenetreCreationCommentaire extends JFrame {
 
         boutonAjouter.addActionListener(e -> {
             String contenu = champCommentaire.getText();
-            Commentaire commentaire = new Commentaire(contenu, new Date(), utilisateur, new Incident());
+            Commentaire commentaire = new Commentaire(contenu, LocalDateTime.now(), utilisateur, new Incident());
             try {
                 commentaireController.createCommentaire(commentaire, incidentId);
                 JOptionPane.showMessageDialog(FenetreCreationCommentaire.this, "Commentaire ajouté avec succès !");

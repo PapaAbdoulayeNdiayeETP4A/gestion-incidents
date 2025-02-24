@@ -5,14 +5,14 @@ public class Developpeur extends Utilisateur {
     private String specialisation;
     private String niveau;
     private int anciennete;
-    private Equipe equipe; // Ajout de l'attribut equipe
+    private Equipe equipe; // Relation avec Equipe
 
     public Developpeur() {
         super();
     }
 
-    public Developpeur(String nom, String email, String role, String specialisation, String niveau, int anciennete, Equipe equipe, String motDePasse) {
-        super(nom, email, role, motDePasse);
+    public Developpeur(int id, String nom, String email, String motDePasse, String specialisation, String niveau, int anciennete, Equipe equipe, String role) {
+        super(id, nom, email, motDePasse, role);
         this.specialisation = specialisation;
         this.niveau = niveau;
         this.anciennete = anciennete;
@@ -52,5 +52,4 @@ public class Developpeur extends Utilisateur {
     public void setEquipe(Equipe equipe) {
         this.equipe = equipe;
     }
-
 }

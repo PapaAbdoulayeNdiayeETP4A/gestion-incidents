@@ -1,31 +1,24 @@
 package com.gestionincidents.model;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDateTime;
 
 public class Commentaire {
 
     private int id;
-    private Integer commentaireParentId; // Ajout de l'attribut
+    private Integer commentaireParentId;
     private String contenu;
-    private Date date;
-    private Utilisateur auteur; // Relation avec Utilisateur
-    private Incident incident; // Relation avec Incident
-    private List<Fichier> fichiers; // Ajout de la liste des fichiers
-
-    // Constructeurs
+    private LocalDateTime date; // LocalDateTime pour correspondre à DATETIME
+    private Utilisateur auteur;
+    private Incident incident;
 
     public Commentaire() {
-        this.fichiers = new ArrayList<>(); // Initialisation de la liste des fichiers
     }
 
-    public Commentaire(String contenu, Date date, Utilisateur auteur, Incident incident) {
+    public Commentaire(String contenu, LocalDateTime date, Utilisateur auteur, Incident incident) {
         this.contenu = contenu;
         this.date = date;
         this.auteur = auteur;
         this.incident = incident;
-        this.fichiers = new ArrayList<>(); // Initialisation de la liste des fichiers
     }
 
     // Getters et setters
@@ -38,6 +31,14 @@ public class Commentaire {
         this.id = id;
     }
 
+    public Integer getCommentaireParentId() {
+        return commentaireParentId;
+    }
+
+    public void setCommentaireParentId(Integer commentaireParentId) {
+        this.commentaireParentId = commentaireParentId;
+    }
+
     public String getContenu() {
         return contenu;
     }
@@ -46,11 +47,11 @@ public class Commentaire {
         this.contenu = contenu;
     }
 
-    public Date getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 
@@ -70,30 +71,20 @@ public class Commentaire {
         this.incident = incident;
     }
 
-    public List<Fichier> getFichiers() {
-        return fichiers;
-    }
-
-    public void setFichiers(List<Fichier> fichiers) {
-        this.fichiers = fichiers;
-    }
-
-    // Méthodes pour les fichiers
-
-    public void ajouterFichier(Fichier fichier) {
-        this.fichiers.add(fichier);
-    }
-
-    public void supprimerFichier(Fichier fichier) {
-        this.fichiers.remove(fichier);
-    }
-    
-    public Integer getCommentaireParentId() {
-        return commentaireParentId;
-    }
-
-    public void setCommentaireParentId(Integer commentaireParentId) {
-        this.commentaireParentId = commentaireParentId;
-    }
-
+    // Gestion des fichiers commentée car gérée dans le DAO/Controller.
+    // public List<Fichier> getFichiers() {
+    //     return fichiers;
+    // }
+    //
+    // public void setFichiers(List<Fichier> fichiers) {
+    //     this.fichiers = fichiers;
+    // }
+    //
+    // public void ajouterFichier(Fichier fichier) {
+    //     this.fichiers.add(fichier);
+    // }
+    //
+    // public void supprimerFichier(Fichier fichier) {
+    //     this.fichiers.remove(fichier);
+    // }
 }

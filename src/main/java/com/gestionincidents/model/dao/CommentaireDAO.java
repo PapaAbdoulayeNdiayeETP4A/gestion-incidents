@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class CommentaireDAO {
 
         try {
             connexion = ConnexionBD.getConnection();
-            String sql = "SELECT c.id, c.contenu, c.date, c.auteur_id, u.nom AS auteur_nom, c.commentaire_parent_id " +
+            String sql = "SELECT c.id, c.contenu, c.date, c.auteur_id, u.nom AS auteur_nom " +
                     "FROM commentaire c " +
                     "INNER JOIN utilisateur u ON c.auteur_id = u.id " +
                     "WHERE c.incident_id = ?";
@@ -36,19 +37,16 @@ public class CommentaireDAO {
                 Commentaire commentaire = new Commentaire();
                 commentaire.setId(resultat.getInt("id"));
                 commentaire.setContenu(resultat.getString("contenu"));
-                commentaire.setDate(resultat.getDate("date"));
+                Timestamp timestamp = resultat.getTimestamp("date");
+                if (timestamp != null) {
+                    commentaire.setDate(timestamp.toLocalDateTime());
+                }
 
-                Utilisateur auteur = new Utilisateur() {
-                    @Override
-                    public String getRole() {
-                        return null;
-                    }
-                };
+                Utilisateur auteur = new Utilisateur();
                 auteur.setId(resultat.getInt("auteur_id"));
                 auteur.setNom(resultat.getString("auteur_nom"));
                 commentaire.setAuteur(auteur);
 
-                commentaire.setCommentaireParentId(resultat.getInt("commentaire_parent_id"));
                 commentaires.add(commentaire);
             }
 
@@ -66,7 +64,7 @@ public class CommentaireDAO {
         Connection connexion = null;
         try {
             connexion = ConnexionBD.getConnection();
-            String sql = "SELECT c.id, c.contenu, c.date, c.auteur_id, u.nom AS auteur_nom, c.commentaire_parent_id " +
+            String sql = "SELECT c.id, c.contenu, c.date, c.auteur_id, u.nom AS auteur_nom " +
                     "FROM commentaire c " +
                     "INNER JOIN utilisateur u ON c.auteur_id = u.id " +
                     "WHERE c.id = ?";
@@ -78,19 +76,16 @@ public class CommentaireDAO {
                 Commentaire commentaire = new Commentaire();
                 commentaire.setId(resultat.getInt("id"));
                 commentaire.setContenu(resultat.getString("contenu"));
-                commentaire.setDate(resultat.getDate("date"));
+                Timestamp timestamp = resultat.getTimestamp("date");
+                if (timestamp != null) {
+                    commentaire.setDate(timestamp.toLocalDateTime());
+                }
 
-                Utilisateur auteur = new Utilisateur() {
-                    @Override
-                    public String getRole() {
-                        return null;
-                    }
-                };
+                Utilisateur auteur = new Utilisateur();
                 auteur.setId(resultat.getInt("auteur_id"));
                 auteur.setNom(resultat.getString("auteur_nom"));
                 commentaire.setAuteur(auteur);
 
-                commentaire.setCommentaireParentId(resultat.getInt("commentaire_parent_id"));
                 return commentaire;
             } else {
                 return null;
@@ -108,7 +103,7 @@ public class CommentaireDAO {
             String sql = "INSERT INTO commentaire (contenu, date, auteur_id, incident_id) VALUES (?, ?, ?, ?)";
             PreparedStatement statement = connexion.prepareStatement(sql);
             statement.setString(1, commentaire.getContenu());
-            statement.setDate(2, new java.sql.Date(commentaire.getDate().getTime()));
+            statement.setTimestamp(2, Timestamp.valueOf(commentaire.getDate()));
             statement.setInt(3, commentaire.getAuteur().getId());
             statement.setInt(4, incidentId);
             statement.executeUpdate();
@@ -118,20 +113,19 @@ public class CommentaireDAO {
             throw e;
         }
     }
-    
+
     public void createReponseCommentaire(Commentaire commentaire, int incidentId, int commentaireParentId) throws SQLException, IOException {
         Connection connexion = null;
         try {
             connexion = ConnexionBD.getConnection();
-            String sql = "INSERT INTO commentaire (contenu, date, auteur_id, incident_id, commentaire_parent_id) VALUES (?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO commentaire (contenu, date, auteur_id, incident_id) VALUES (?, ?, ?, ?)";
             PreparedStatement statement = connexion.prepareStatement(sql);
             statement.setString(1, commentaire.getContenu());
-            statement.setDate(2, new java.sql.Date(commentaire.getDate().getTime()));
+            statement.setTimestamp(2, Timestamp.valueOf(commentaire.getDate()));
             statement.setInt(3, commentaire.getAuteur().getId());
             statement.setInt(4, incidentId);
-            statement.setInt(5, commentaireParentId); // Ajout du commentaire parent
             statement.executeUpdate();
-            logger.info("Réponse au commentaire " + commentaireParentId + " créée pour l'incident " + incidentId);
+            logger.info("Réponse au commentaire créée pour l'incident " + incidentId);
         } catch (SQLException | IOException e) {
             logger.error("Erreur lors de la création de la réponse au commentaire : " + e.getMessage());
             throw e;
@@ -145,7 +139,7 @@ public class CommentaireDAO {
             String sql = "UPDATE commentaire SET contenu = ?, date = ?, auteur_id = ? WHERE id = ?";
             PreparedStatement statement = connexion.prepareStatement(sql);
             statement.setString(1, commentaire.getContenu());
-            statement.setDate(2, new java.sql.Date(commentaire.getDate().getTime()));
+            statement.setTimestamp(2, Timestamp.valueOf(commentaire.getDate()));
             statement.setInt(3, commentaire.getAuteur().getId());
             statement.setInt(4, commentaire.getId());
             statement.executeUpdate();

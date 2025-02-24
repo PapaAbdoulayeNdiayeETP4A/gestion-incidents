@@ -3,16 +3,16 @@ package com.gestionincidents.model;
 public class Rapporteur extends Utilisateur {
 
     private String service;
-    private String num_matricule;
+    private String numMatricule;
 
     public Rapporteur() {
         super();
     }
 
-    public Rapporteur(String nom, String email, String role, String service, String num_matricule, String motDePasse) {
-        super(nom, email, role, motDePasse);
+    public Rapporteur(int id, String nom, String email, String motDePasse, String service, String numMatricule, String role) {
+        super(id, nom, email, motDePasse, role);
         this.service = service;
-        this.num_matricule = num_matricule;
+        this.numMatricule = numMatricule;
     }
 
     // Getters et setters pour les attributs spécifiques
@@ -26,11 +26,10 @@ public class Rapporteur extends Utilisateur {
     }
 
     public String getNumMatricule() {
-        return num_matricule;
+        return numMatricule;
     }
 
-    public void setNumMatricule(String num_matricule) {
-        this.num_matricule = num_matricule;
+    public void setNumMatricule(String numMatricule) {
+        this.numMatricule = numMatricule;
     }
-
 }
