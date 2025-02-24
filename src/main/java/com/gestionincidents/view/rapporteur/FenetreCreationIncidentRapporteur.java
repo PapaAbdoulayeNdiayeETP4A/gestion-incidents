@@ -7,16 +7,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FenetreCreationIncidentRapporteur extends JFrame {
 
-    private Utilisateur rapporteur;
-    private IncidentController incidentController;
+
+	private static final long serialVersionUID = 1L;
+	private IncidentController incidentController;
+	private Map<String, Integer> applicationMap;
 
     public FenetreCreationIncidentRapporteur(Utilisateur rapporteur) throws SQLException {
-        this.rapporteur = rapporteur;
+    	applicationMap = new HashMap<>();
         try {
             this.incidentController = new IncidentController();
         } catch (SQLException | IOException e) {
@@ -38,9 +42,10 @@ public class FenetreCreationIncidentRapporteur extends JFrame {
         JLabel labelApplication = new JLabel("Application concernée :");
         JComboBox<String> comboApplication = new JComboBox<>();
         try {
-            List<Application> applications = incidentController.getAllApplications();
+        	List<Application> applications = incidentController.getAllApplications();
             for (Application app : applications) {
                 comboApplication.addItem(app.getNom());
+                applicationMap.put(app.getNom(), app.getId());
             }
         } catch (SQLException | IOException e) {
             JOptionPane.showMessageDialog(this, "Erreur lors de la récupération des applications : " + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
@@ -69,18 +74,33 @@ public class FenetreCreationIncidentRapporteur extends JFrame {
 
         // Gestion des événements
         boutonCreer.addActionListener(e -> {
-            String applicationNom = (String) comboApplication.getSelectedItem();
+        	String applicationNom = (String) comboApplication.getSelectedItem();
+            int applicationId = applicationMap.get(applicationNom);
             String description = champDescription.getText();
             Priorite priorite = (Priorite) comboPriorite.getSelectedItem();
-
-            Application application = new Application();
-            application.setNom(applicationNom);
-
             Incident incident = new Incident();
-            incident.setApplicationConcernee(application);
+
+            try {
+                // Récupérer l'objet Application à partir de la liste des applications
+                List<Application> applications = incidentController.getAllApplications();
+                Application applicationSelectionnee = applications.stream()
+                        .filter(app -> app.getId() == applicationId)
+                        .findFirst()
+                        .orElse(null);
+
+                if (applicationSelectionnee != null) {
+                    incident.setApplicationConcernee(applicationSelectionnee);
+                } else {
+                    JOptionPane.showMessageDialog(FenetreCreationIncidentRapporteur.this, "Application non trouvée.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            } catch (SQLException | IOException ex) {
+                JOptionPane.showMessageDialog(FenetreCreationIncidentRapporteur.this, "Erreur lors de la récupération de l'application : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
             incident.setDescription(description);
-            incident.setDateCreation(new Date());
-            incident.setDateModification(new Date());
+            incident.setDateCreation(LocalDateTime.now()); // Utilisation de LocalDateTime
             incident.setPriorite(priorite);
             incident.setStatut(Statut.OUVERT);
             incident.setRapporteur(rapporteur);

@@ -1,6 +1,6 @@
 package com.gestionincidents.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class FichierImage extends Fichier {
 
@@ -13,7 +13,7 @@ public class FichierImage extends Fichier {
         super();
     }
 
-    public FichierImage(String nom, Date dateUpload, Utilisateur uploader, Incident incident, byte[] contenu, int largeur, int hauteur, String format) {
+    public FichierImage(String nom, LocalDateTime dateUpload, Utilisateur uploader, Incident incident, byte[] contenu, int largeur, int hauteur, String format) {
         super(nom, dateUpload, uploader, incident);
         this.contenu = contenu;
         this.largeur = largeur;
@@ -54,5 +54,4 @@ public class FichierImage extends Fichier {
     public void setFormat(String format) {
         this.format = format;
     }
-
 }

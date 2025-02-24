@@ -65,7 +65,7 @@ public class IncidentController {
             logger.error("Erreur lors de la suppression de l'incident " + id + " : " + e.getMessage());
         }
     }
-    
+
     public List<Application> getAllApplications() throws SQLException, IOException {
         return applicationDAO.getApplications();
     }

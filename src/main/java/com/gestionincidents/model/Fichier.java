@@ -1,19 +1,19 @@
 package com.gestionincidents.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public abstract class Fichier {
 
     private int id;
     private String nom;
-    private Date dateUpload;
+    private LocalDateTime dateUpload; // LocalDateTime pour correspondre à DATETIME
     private Utilisateur uploader;
     private Incident incident;
 
     public Fichier() {
     }
 
-    public Fichier(String nom, Date dateUpload, Utilisateur uploader, Incident incident) {
+    public Fichier(String nom, LocalDateTime dateUpload, Utilisateur uploader, Incident incident) {
         this.nom = nom;
         this.dateUpload = dateUpload;
         this.uploader = uploader;
@@ -38,11 +38,11 @@ public abstract class Fichier {
         this.nom = nom;
     }
 
-    public Date getDateUpload() {
+    public LocalDateTime getDateUpload() {
         return dateUpload;
     }
 
-    public void setDateUpload(Date dateUpload) {
+    public void setDateUpload(LocalDateTime dateUpload) {
         this.dateUpload = dateUpload;
     }
 

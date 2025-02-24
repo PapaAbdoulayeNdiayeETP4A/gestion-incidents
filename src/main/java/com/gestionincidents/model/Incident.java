@@ -1,37 +1,35 @@
 package com.gestionincidents.model;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Incident {
 
     private int id;
     private Application applicationConcernee;
     private String description;
-    private Date dateCreation;
-    private Date dateModification;
-    private Priorite priorite;
-    private Statut statut;
+    private LocalDate dateSignalement; // LocalDate pour correspondre à DATE
+    private LocalDateTime dateCreation; // LocalDateTime pour correspondre à DATETIME
+    private LocalDateTime dateModification; // LocalDateTime pour correspondre à DATETIME
+    private Priorite priorite; // String pour correspondre à VARCHAR
+    private Statut statut; // String pour correspondre à VARCHAR
     private Utilisateur rapporteur;
     private Utilisateur assigneA;
-    private Date dateCloture;
+    private LocalDate dateCloture; // LocalDate pour correspondre à DATE
     private String solution;
-    private List<Commentaire> commentaires;
 
     public Incident() {
-        this.commentaires = new ArrayList<>();
     }
 
-    public Incident(Application applicationConcernee, String description, Date dateCreation, Date dateModification, Priorite priorite, Statut statut, Utilisateur rapporteur) {
+    public Incident(Application applicationConcernee, String description, LocalDate dateSignalement, LocalDateTime dateCreation, LocalDateTime dateModification, Priorite priorite, Statut statut, Utilisateur rapporteur) {
         this.applicationConcernee = applicationConcernee;
         this.description = description;
+        this.dateSignalement = dateSignalement;
         this.dateCreation = dateCreation;
         this.dateModification = dateModification;
         this.priorite = priorite;
         this.statut = statut;
         this.rapporteur = rapporteur;
-        this.commentaires = new ArrayList<>();
     }
 
     // Getters et setters
@@ -60,19 +58,27 @@ public class Incident {
         this.description = description;
     }
 
-    public Date getDateCreation() {
+    public LocalDate getDateSignalement() {
+        return dateSignalement;
+    }
+
+    public void setDateSignalement(LocalDate dateSignalement) {
+        this.dateSignalement = dateSignalement;
+    }
+
+    public LocalDateTime getDateCreation() {
         return dateCreation;
     }
 
-    public void setDateCreation(Date dateCreation) {
+    public void setDateCreation(LocalDateTime dateCreation) {
         this.dateCreation = dateCreation;
     }
 
-    public Date getDateModification() {
+    public LocalDateTime getDateModification() {
         return dateModification;
     }
 
-    public void setDateModification(Date dateModification) {
+    public void setDateModification(LocalDateTime dateModification) {
         this.dateModification = dateModification;
     }
 
@@ -108,11 +114,11 @@ public class Incident {
         this.assigneA = assigneA;
     }
 
-    public Date getDateCloture() {
+    public LocalDate getDateCloture() {
         return dateCloture;
     }
 
-    public void setDateCloture(Date dateCloture) {
+    public void setDateCloture(LocalDate dateCloture) {
         this.dateCloture = dateCloture;
     }
 
@@ -124,19 +130,20 @@ public class Incident {
         this.solution = solution;
     }
 
-    public List<Commentaire> getCommentaires() {
-        return commentaires;
-    }
-
-    public void setCommentaires(List<Commentaire> commentaires) {
-        this.commentaires = commentaires;
-    }
-
-    public void ajouterCommentaire(Commentaire commentaire) {
-        this.commentaires.add(commentaire);
-    }
-
-    public void supprimerCommentaire(Commentaire commentaire) {
-        this.commentaires.remove(commentaire);
-    }
+    // List de commentaires commentée car géré dans le DAO/Controller.
+    // public List<Commentaire> getCommentaires() {
+    //     return commentaires;
+    // }
+    //
+    // public void setCommentaires(List<Commentaire> commentaires) {
+    //     this.commentaires = commentaires;
+    // }
+    //
+    // public void ajouterCommentaire(Commentaire commentaire) {
+    //     this.commentaires.add(commentaire);
+    // }
+    //
+    // public void supprimerCommentaire(Commentaire commentaire) {
+    //     this.commentaires.remove(commentaire);
+    // }
 }

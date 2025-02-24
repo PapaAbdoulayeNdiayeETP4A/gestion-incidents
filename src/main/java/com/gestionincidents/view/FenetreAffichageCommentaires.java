@@ -13,7 +13,8 @@ import java.util.List;
 
 public class FenetreAffichageCommentaires extends JFrame {
 
-    private int incidentId;
+	private static final long serialVersionUID = 1L;
+	private int incidentId;
     private CommentaireController commentaireController;
     private DefaultTableModel modeleTableau;
 
@@ -29,7 +30,7 @@ public class FenetreAffichageCommentaires extends JFrame {
         JPanel panneauPrincipal = new JPanel(new BorderLayout());
         add(panneauPrincipal);
 
-        String[] colonnes = {"Auteur", "Date", "Contenu", "Répondre à"};
+        String[] colonnes = {"ID", "Auteur", "Date", "Contenu", "Répondre à"};
         modeleTableau = new DefaultTableModel(colonnes, 0);
         JTable tableauCommentaires = new JTable(modeleTableau);
         JScrollPane scrollPane = new JScrollPane(tableauCommentaires);
@@ -51,7 +52,7 @@ public class FenetreAffichageCommentaires extends JFrame {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 int row = tableauCommentaires.rowAtPoint(evt.getPoint());
                 int col = tableauCommentaires.columnAtPoint(evt.getPoint());
-                if (col == 3 && row >= 0) { // Colonne "Répondre à"
+                if (col == 4 && row >= 0) { // Colonne "Répondre à"
                     int commentaireParentId = (int) modeleTableau.getValueAt(row, 0); // ID du commentaire parent
                     try {
                         new FenetreCreationReponseCommentaire(incidentId, commentaireParentId, rapporteur, commentaireController).setVisible(true);

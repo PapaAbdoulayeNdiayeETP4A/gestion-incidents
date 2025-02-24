@@ -10,12 +10,11 @@ import java.sql.SQLException;
 
 public class FenetreChangementStatutIncident extends JFrame {
 
-    private Incident incident;
-    private IncidentController incidentController;
+	private static final long serialVersionUID = 1L;
+	private Incident incident;
     private JComboBox<Statut> comboStatut;
 
     public FenetreChangementStatutIncident(int incidentId, IncidentController incidentController) throws SQLException {
-        this.incidentController = incidentController;
         this.incident = incidentController.getIncident(incidentId);
 
         setTitle("Changement de Statut d'un Incident");

@@ -8,8 +8,8 @@ public class Responsable extends Utilisateur {
         super();
     }
 
-    public Responsable(String nom, String email, String role, String departement, String motDePasse) {
-        super(nom, email, role, motDePasse);
+    public Responsable(int id, String nom, String email, String motDePasse, String departement, String role) {
+        super(id, nom, email, motDePasse, role);
         this.departement = departement;
     }
 
@@ -22,5 +22,4 @@ public class Responsable extends Utilisateur {
     public void setDepartement(String departement) {
         this.departement = departement;
     }
-
 }

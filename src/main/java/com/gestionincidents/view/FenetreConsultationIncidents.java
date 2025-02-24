@@ -17,6 +17,7 @@ import java.util.List;
 
 public class FenetreConsultationIncidents extends JFrame {
 
+    private static final long serialVersionUID = 1L;
     private JTable tableauIncidents;
     private DefaultTableModel modeleTableau;
     private IncidentController incidentController;
@@ -79,7 +80,7 @@ public class FenetreConsultationIncidents extends JFrame {
                 }
             }
         });
-        
+
         tableauIncidents.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -176,8 +177,7 @@ public class FenetreConsultationIncidents extends JFrame {
                 }
                 modeleTableau.addRow(donnee);
             }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erreur lors de la mise à jour du tableau : " + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) { JOptionPane.showMessageDialog(this, "Erreur lors de la mise à jour du tableau : " + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

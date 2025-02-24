@@ -1,18 +1,18 @@
 package com.gestionincidents.model;
 
-import java.util.List;
-
 public class Equipe {
 
     private int id;
     private String nom;
-    private List<Developpeur> membres; // Ajout de la liste des membres (Developpeurs)
-    private List<Application> applications; // Ajout de la liste des applications
+    // Gestion des membres et applications commentée car gérée dans le DAO/Controller.
+    // private List<Developpeur> membres;
+    // private List<Application> applications;
 
     public Equipe() {
     }
 
-    public Equipe(String nom) {
+    public Equipe(int id, String nom) {
+        this.id = id;
         this.nom = nom;
     }
 
@@ -34,20 +34,20 @@ public class Equipe {
         this.nom = nom;
     }
 
-    public List<Developpeur> getMembres() {
-        return membres;
-    }
-
-    public void setMembres(List<Developpeur> membres) {
-        this.membres = membres;
-    }
-
-    public List<Application> getApplications() {
-        return applications;
-    }
-
-    public void setApplications(List<Application> applications) {
-        this.applications = applications;
-    }
-
+    // Gestion des membres et applications commentée car gérée dans le DAO/Controller.
+    // public List<Developpeur> getMembres() {
+    //     return membres;
+    // }
+    //
+    // public void setMembres(List<Developpeur> membres) {
+    //     this.membres = membres;
+    // }
+    //
+    // public List<Application> getApplications() {
+    //     return applications;
+    // }
+    //
+    // public void setApplications(List<Application> applications) {
+    //     this.applications = applications;
+    // }
 }

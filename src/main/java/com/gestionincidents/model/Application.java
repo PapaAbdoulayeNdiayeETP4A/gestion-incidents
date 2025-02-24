@@ -1,29 +1,34 @@
 package com.gestionincidents.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Application {
 
-    private String nom; // Clé primaire
+    private int id; // Ajout de l'ID comme clé primaire
+    private String nom; // Clé primaire (dans la base de données)
     private String description;
     private String version;
     private Equipe equipeResponsable; // Relation avec Equipe
-    private List<Incident> incidents; // Relation avec Incident
 
     // Constructeurs
 
     public Application() {}
 
-    public Application(String nom, String description, String version, Equipe equipeResponsable) {
+    public Application(int id, String nom, String description, String version, Equipe equipeResponsable) {
+        this.id = id;
         this.nom = nom;
         this.description = description;
         this.version = version;
         this.equipeResponsable = equipeResponsable;
-        this.incidents = new ArrayList<>(); // Initialisation de la liste des incidents
     }
 
     // Getters et setters
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getNom() {
         return nom;
@@ -57,22 +62,22 @@ public class Application {
         this.equipeResponsable = equipeResponsable;
     }
 
-    public List<Incident> getIncidents() {
-        return incidents;
-    }
+    // Méthodes pour les incidents (commentées car nous ne voulons pas les gérer dans Application)
 
-    public void setIncidents(List<Incident> incidents) {
-        this.incidents = incidents;
-    }
+    // public List<Incident> getIncidents() {
+    //     return incidents;
+    // }
 
-    // Méthodes pour les incidents
+    // public void setIncidents(List<Incident> incidents) {
+    //     this.incidents = incidents;
+    // }
 
-    public void ajouterIncident(Incident incident) {
-        this.incidents.add(incident);
-    }
+    // public void ajouterIncident(Incident incident) {
+    //     this.incidents.add(incident);
+    // }
 
-    public void supprimerIncident(Incident incident) {
-        this.incidents.remove(incident);
-    }
+    // public void supprimerIncident(Incident incident) {
+    //     this.incidents.remove(incident);
+    // }
 
 }

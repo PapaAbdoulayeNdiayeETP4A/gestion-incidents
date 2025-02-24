@@ -1,6 +1,6 @@
 package com.gestionincidents.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class FichierTrace extends Fichier {
 
@@ -11,7 +11,7 @@ public class FichierTrace extends Fichier {
         super();
     }
 
-    public FichierTrace(String nom, Date dateUpload, Utilisateur uploader, Incident incident, String contenu, String logicielSource) {
+    public FichierTrace(String nom, LocalDateTime dateUpload, Utilisateur uploader, Incident incident, String contenu, String logicielSource) {
         super(nom, dateUpload, uploader, incident);
         this.contenu = contenu;
         this.logicielSource = logicielSource;
@@ -34,5 +34,4 @@ public class FichierTrace extends Fichier {
     public void setLogicielSource(String logicielSource) {
         this.logicielSource = logicielSource;
     }
-
 }
