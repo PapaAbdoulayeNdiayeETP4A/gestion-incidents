@@ -80,17 +80,24 @@ public class UtilisateurController {
         return utilisateurDAO.rechercherUtilisateursParNom(nom);
     }
 
-    public Utilisateur verifierConnexion(String email, String motDePasse) {
+    public int verifierConnexion(String email, String motDePasse) {
         try {
             Utilisateur utilisateur = utilisateurDAO.getUtilisateurParEmail(email);
             if (utilisateur != null && utilisateur.getMotDePasse().equals(motDePasse)) {
-                return utilisateur;
+                if (utilisateur.isEstSupprime()) {
+                    return -1; // Utilisateur supprimé
+                }
+                return 1; // Connexion réussie;
             } else {
-                return null;
+            	return 0;
             }
-        } catch (SQLException | IOException e) {
-            logger.error("Erreur lors de la vérification de la connexion : " + e.getMessage());
-            return null;
+        } catch (SQLException | IOException ex) {
+            ex.printStackTrace();
         }
+        return 0;
+    }
+    
+    public void supprimerUtilisateur(int id) throws SQLException, IOException {
+        utilisateurDAO.supprimerUtilisateur(id);
     }
 }
