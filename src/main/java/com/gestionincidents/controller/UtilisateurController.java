@@ -71,6 +71,14 @@ public class UtilisateurController {
             logger.error("Erreur lors de la suppression de l'utilisateur " + id + " : " + e.getMessage());
         }
     }
+    
+    public Utilisateur rechercherUtilisateurParId(int id) throws SQLException, IOException {
+        return utilisateurDAO.rechercherUtilisateurParId(id);
+    }
+
+    public List<Utilisateur> rechercherUtilisateursParNom(String nom) throws SQLException, IOException {
+        return utilisateurDAO.rechercherUtilisateursParNom(nom);
+    }
 
     public Utilisateur verifierConnexion(String email, String motDePasse) {
         try {

@@ -236,4 +236,45 @@ public class UtilisateurDAO {
         }
         return -1; // Ou lancez une exception si le responsable n'est pas trouvé
     }
+    
+    public Utilisateur rechercherUtilisateurParId(int id) throws SQLException, IOException {
+        String sql = "SELECT id, nom, email, mot_de_passe, role FROM utilisateur WHERE id = ?";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql)) {
+            statement.setInt(1, id);
+            try (ResultSet resultat = statement.executeQuery()) {
+                if (resultat.next()) {
+                    Utilisateur utilisateur = new Utilisateur();
+                    utilisateur.setId(resultat.getInt("id"));
+                    utilisateur.setNom(resultat.getString("nom"));
+                    utilisateur.setEmail(resultat.getString("email"));
+                    utilisateur.setMotDePasse(resultat.getString("mot_de_passe"));
+                    utilisateur.setRole(resultat.getString("role"));
+                    return utilisateur;
+                }
+                return null; // Utilisateur non trouvé
+            }
+        }
+    }
+
+    public List<Utilisateur> rechercherUtilisateursParNom(String nom) throws SQLException, IOException {
+        List<Utilisateur> utilisateurs = new ArrayList<>();
+        String sql = "SELECT id, nom, email, mot_de_passe, role FROM utilisateur WHERE nom LIKE ?";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql)) {
+            statement.setString(1, "%" + nom + "%"); // Recherche partielle
+            try (ResultSet resultat = statement.executeQuery()) {
+                while (resultat.next()) {
+                    Utilisateur utilisateur = new Utilisateur();
+                    utilisateur.setId(resultat.getInt("id"));
+                    utilisateur.setNom(resultat.getString("nom"));
+                    utilisateur.setEmail(resultat.getString("email"));
+                    utilisateur.setMotDePasse(resultat.getString("mot_de_passe"));
+                    utilisateur.setRole(resultat.getString("role"));
+                    utilisateurs.add(utilisateur);
+                }
+                return utilisateurs;
+            }
+        }
+    }
 }
