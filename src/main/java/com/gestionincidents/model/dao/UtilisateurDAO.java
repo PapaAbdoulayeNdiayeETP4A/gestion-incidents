@@ -87,6 +87,23 @@ public class UtilisateurDAO {
             throw e;
         }
     }
+    
+    public List<Integer> getDeveloppeurIdsByResponsableId(int responsableId) throws SQLException, IOException {
+        List<Integer> developpeurIds = new ArrayList<>();
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement("SELECT utilisateur_id FROM developpeur WHERE responsable_id = ?")) {
+            statement.setInt(1, responsableId);
+            try (ResultSet resultat = statement.executeQuery()) {
+                while (resultat.next()) {
+                    developpeurIds.add(resultat.getInt("utilisateur_id"));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Erreur lors de la récupération des développeurs de l'équipe : " + e.getMessage());
+            throw e;
+        }
+        return developpeurIds;
+    }
 
     public void createUtilisateur(Utilisateur utilisateur) throws SQLException, IOException {
         Connection connexion = null;

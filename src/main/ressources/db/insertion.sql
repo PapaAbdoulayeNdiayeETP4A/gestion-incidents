@@ -50,19 +50,19 @@ INSERT INTO equipe_utilisateur (equipe_id, utilisateur_id) VALUES
 (2, 5),
 (1, 3);
 
+-- Insertions dans la table responsable
+INSERT INTO responsable (utilisateur_id, departement) VALUES
+(3, 'Développement Web');
+
 -- Insertions dans la table developpeur
-INSERT INTO developpeur (id, utilisateur_id, specialisation, niveau, anciennete, equipe_id) VALUES
-(1, 1, 'Web', 'Expert', 5, 1),
-(5, 5, 'Mobile', 'Intermédiaire', 2, 2);
+INSERT INTO developpeur (utilisateur_id, specialisation, niveau, anciennete, equipe_id, responsable_id) VALUES
+(1, 'Web', 'Expert', 5, 1, 3),
+(5, 'Mobile', 'Intermédiaire', 2, 2, 3);
 
 -- Insertions dans la table rapporteur
-INSERT INTO rapporteur (id, utilisateur_id, service, num_matricule) VALUES
-(2, 2, 'Support Client', 'RC123'),
-(6, 6, 'Marketing', 'RM456');
-
--- Insertions dans la table responsable
-INSERT INTO responsable (id, utilisateur_id, departement) VALUES
-(3, 3, 'Développement Web');
+INSERT INTO rapporteur (utilisateur_id, service, num_matricule) VALUES
+(2, 'Support Client', 'RC123'),
+(6, 'Marketing', 'RM456');
 
 -- Insertions dans la table fichier_trace
 INSERT INTO fichier_trace (id, contenu, logiciel_source) VALUES
