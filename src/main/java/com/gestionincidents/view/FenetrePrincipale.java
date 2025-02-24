@@ -3,6 +3,7 @@ package com.gestionincidents.view;
 import com.gestionincidents.controller.UtilisateurController;
 import com.gestionincidents.model.Utilisateur;
 import com.gestionincidents.view.administrateur.FenetreCreationUtilisateur;
+import com.gestionincidents.view.administrateur.FenetreRechercheUtilisateur;
 import com.gestionincidents.view.rapporteur.FenetreCreationIncidentRapporteur;
 
 import javax.swing.*;
@@ -92,7 +93,9 @@ public class FenetrePrincipale extends JFrame {
             });
         } else if (utilisateur.getRole().equals("administrateur")) {
             JButton boutonCreerUtilisateur = new JButton("Créer un utilisateur");
+            JButton rechercherUtilisateur = new JButton("Rechercher utilisateur");
             panneauPrincipal.add(boutonCreerUtilisateur);
+            panneauPrincipal.add(rechercherUtilisateur);
             boutonCreerUtilisateur.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -102,6 +105,19 @@ public class FenetrePrincipale extends JFrame {
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         JOptionPane.showMessageDialog(FenetrePrincipale.this, "Erreur lors de l'ouverture de la fenêtre de création d'utilisateur : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            });
+            
+            rechercherUtilisateur.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                    	UtilisateurController utilisateurController = new UtilisateurController();
+                        new FenetreRechercheUtilisateur(utilisateurController).setVisible(true);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(FenetrePrincipale.this, "Erreur lors de l'ouverture de la fenêtre de recherche : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             });
