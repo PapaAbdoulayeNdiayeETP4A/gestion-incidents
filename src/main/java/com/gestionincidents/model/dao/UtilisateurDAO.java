@@ -122,6 +122,41 @@ public class UtilisateurDAO {
             throw e;
         }
     }
+    
+    public void createDeveloppeur(int utilisateurId, String specialisation, String niveau, int anciennete, int equipeId, int responsableId) throws SQLException, IOException {
+        String sql = "INSERT INTO developpeur (utilisateur_id, specialisation, niveau, anciennete, equipe_id, responsable_id) VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql)) {
+            statement.setInt(1, utilisateurId);
+            statement.setString(2, specialisation);
+            statement.setString(3, niveau);
+            statement.setInt(4, anciennete);
+            statement.setInt(5, equipeId);
+            statement.setInt(6, responsableId);
+            statement.executeUpdate();
+        }
+    }
+
+    public void createRapporteur(int utilisateurId, String service, String numMatricule) throws SQLException, IOException {
+        String sql = "INSERT INTO rapporteur (utilisateur_id, service, num_matricule) VALUES (?, ?, ?)";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql)) {
+            statement.setInt(1, utilisateurId);
+            statement.setString(2, service);
+            statement.setString(3, numMatricule);
+            statement.executeUpdate();
+        }
+    }
+
+    public void createResponsable(int utilisateurId, String departement) throws SQLException, IOException {
+        String sql = "INSERT INTO responsable (utilisateur_id, departement) VALUES (?, ?)";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql)) {
+            statement.setInt(1, utilisateurId);
+            statement.setString(2, departement);
+            statement.executeUpdate();
+        }
+    }
 
     public void updateUtilisateur(Utilisateur utilisateur) throws SQLException, IOException {
         Connection connexion = null;
@@ -155,5 +190,50 @@ public class UtilisateurDAO {
             logger.error("Erreur lors de la suppression de l'utilisateur " + id + " : " + e.getMessage());
             throw e;
         }
+    }
+
+    public int getDernierIdUtilisateur() throws SQLException, IOException {
+        String sql = "SELECT LAST_INSERT_ID()";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql);
+             ResultSet resultat = statement.executeQuery()) {
+            if (resultat.next()) {
+                return resultat.getInt(1);
+            }
+            return -1; // Ou lancez une exception si aucun ID n'est trouvé
+        }
+    }
+    
+    public List<Utilisateur> getAllResponsables() throws SQLException, IOException {
+        List<Utilisateur> responsables = new ArrayList<>();
+        String sql = "SELECT u.id, u.nom, u.email, u.mot_de_passe, u.role FROM utilisateur u INNER JOIN responsable r ON u.id = r.utilisateur_id";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql);
+             ResultSet resultat = statement.executeQuery()) {
+            while (resultat.next()) {
+                Utilisateur responsable = new Utilisateur();
+                responsable.setId(resultat.getInt("id"));
+                responsable.setNom(resultat.getString("nom"));
+                responsable.setEmail(resultat.getString("email"));
+                responsable.setMotDePasse(resultat.getString("mot_de_passe"));
+                responsable.setRole(resultat.getString("role"));
+                responsables.add(responsable);
+            }
+        }
+        return responsables;
+    }
+
+    public int getResponsableIdByName(String nomResponsable) throws SQLException, IOException {
+        String sql = "SELECT u.id FROM utilisateur u INNER JOIN responsable r ON u.id = r.utilisateur_id WHERE u.nom = ?";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql)) {
+            statement.setString(1, nomResponsable);
+            try (ResultSet resultat = statement.executeQuery()) {
+                if (resultat.next()) {
+                    return resultat.getInt("id");
+                }
+            }
+        }
+        return -1; // Ou lancez une exception si le responsable n'est pas trouvé
     }
 }
