@@ -95,18 +95,20 @@ CREATE TABLE equipe_utilisateur (
 
 -- Tables pour les classes filles de Utilisateur
 CREATE TABLE developpeur (
-    id INT PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     utilisateur_id INT UNIQUE NOT NULL,
     specialisation VARCHAR(255),
     niveau VARCHAR(50),
     anciennete INT,
     equipe_id INT,
+    responsable_id INT, -- Ajout de responsable_id
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id),
-    FOREIGN KEY (equipe_id) REFERENCES equipe(id)
+    FOREIGN KEY (equipe_id) REFERENCES equipe(id),
+    FOREIGN KEY (responsable_id) REFERENCES responsable(utilisateur_id) -- Clé étrangère vers la table responsable
 );
 
 CREATE TABLE rapporteur (
-    id INT PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     utilisateur_id INT UNIQUE NOT NULL,
     service VARCHAR(255),
     num_matricule VARCHAR(255),
@@ -114,7 +116,7 @@ CREATE TABLE rapporteur (
 );
 
 CREATE TABLE responsable (
-    id INT PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     utilisateur_id INT UNIQUE NOT NULL,
     departement VARCHAR(255),
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id)
@@ -122,14 +124,14 @@ CREATE TABLE responsable (
 
 -- Tables pour les classes filles de Fichier
 CREATE TABLE fichier_trace (
-    id INT PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     contenu TEXT,
     logiciel_source VARCHAR(255),
     FOREIGN KEY (id) REFERENCES fichier(id)
 );
 
 CREATE TABLE fichier_image (
-    id INT PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     contenu MEDIUMBLOB,
     largeur INT,
     hauteur INT,

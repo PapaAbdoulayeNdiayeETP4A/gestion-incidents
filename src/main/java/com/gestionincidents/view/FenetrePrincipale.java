@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.sql.SQLException;
 
 public class FenetrePrincipale extends JFrame {
@@ -55,7 +56,7 @@ public class FenetrePrincipale extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     try {
                         new FenetreConsultationIncidents(utilisateur).setVisible(true);
-                    } catch (SQLException ex) {
+                    } catch (SQLException | IOException ex) {
                         ex.printStackTrace();
                     }
                 }
@@ -68,7 +69,7 @@ public class FenetrePrincipale extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     try {
                         new FenetreConsultationIncidents(utilisateur).setVisible(true);
-                    } catch (SQLException ex) {
+                    } catch (SQLException | IOException ex) {
                         ex.printStackTrace();
                     }
                 }
@@ -82,7 +83,7 @@ public class FenetrePrincipale extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     try {
                         new FenetreConsultationIncidents(utilisateur).setVisible(true);
-                    } catch (SQLException ex) {
+                    } catch (SQLException | IOException ex) {
                         ex.printStackTrace();
                     }
                 }
