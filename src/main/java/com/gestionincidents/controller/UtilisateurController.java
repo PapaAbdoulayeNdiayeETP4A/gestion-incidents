@@ -43,6 +43,18 @@ public class UtilisateurController {
             logger.error("Erreur lors de la création de l'utilisateur : " + e.getMessage());
         }
     }
+    
+    public void createDeveloppeur(int utilisateurId, String specialisation, String niveau, int anciennete, int equipeId, int responsableId) throws SQLException, IOException {
+        utilisateurDAO.createDeveloppeur(utilisateurId, specialisation, niveau, anciennete, equipeId, responsableId);
+    }
+
+    public void createRapporteur(int utilisateurId, String service, String numMatricule) throws SQLException, IOException {
+        utilisateurDAO.createRapporteur(utilisateurId, service, numMatricule);
+    }
+
+    public void createResponsable(int utilisateurId, String departement) throws SQLException, IOException {
+        utilisateurDAO.createResponsable(utilisateurId, departement);
+    }
 
     public void updateUtilisateur(Utilisateur utilisateur) {
         try {

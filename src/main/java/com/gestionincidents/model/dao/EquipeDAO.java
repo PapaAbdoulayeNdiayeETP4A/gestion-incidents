@@ -128,6 +128,20 @@ public class EquipeDAO {
             throw e;
         }
     }
+    
+    public int getEquipeIdByName(String nomEquipe) throws SQLException, IOException {
+        String sql = "SELECT id FROM equipe WHERE nom = ?";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql)) {
+            statement.setString(1, nomEquipe);
+            try (ResultSet resultat = statement.executeQuery()) {
+                if (resultat.next()) {
+                    return resultat.getInt("id");
+                }
+            }
+        }
+        return -1; // Ou lancez une exception si l'équipe n'est pas trouvée
+    }
 
     // Gestion des membres et applications déplacée vers DAO/Controller.
     // private List<Developpeur> getDeveloppeurs(Connection connexion, int equipeId) throws SQLException {

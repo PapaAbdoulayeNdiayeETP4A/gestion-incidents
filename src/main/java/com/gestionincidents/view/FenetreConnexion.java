@@ -75,6 +75,9 @@ public class FenetreConnexion extends JFrame {
             case "developpeur":
             	new FenetrePrincipale(utilisateur).setVisible(true);
                 break;
+            case "administrateur":
+            	new FenetrePrincipale(utilisateur).setVisible(true);
+                break;
             default:
                 JOptionPane.showMessageDialog(this, "Rôle d'utilisateur inconnu.");
             }
