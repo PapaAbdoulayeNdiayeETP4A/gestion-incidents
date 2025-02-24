@@ -2,10 +2,14 @@ package com.gestionincidents.view;
 
 import com.gestionincidents.controller.UtilisateurController;
 import com.gestionincidents.model.Utilisateur;
+import com.gestionincidents.model.dao.UtilisateurDAO;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.sql.SQLException;
 
 public class FenetreConnexion extends JFrame {
 
@@ -55,11 +59,31 @@ public class FenetreConnexion extends JFrame {
     }
 
     private void verifierConnexion(String email, String motDePasse) {
-        Utilisateur utilisateur = utilisateurController.verifierConnexion(email, motDePasse);
-        if (utilisateur != null) {
-            ouvrirFenetreRole(utilisateur);
-        } else {
-            JOptionPane.showMessageDialog(this, "Email ou mot de passe incorrect.");
+        int resultat = utilisateurController.verifierConnexion(email, motDePasse);
+
+        switch (resultat) {
+            case 1:
+                // Connexion réussie
+                try {
+                    UtilisateurDAO utilisateurDAO = new UtilisateurDAO();
+					Utilisateur utilisateur = utilisateurDAO.getUtilisateurParEmail(email);
+                    ouvrirFenetreRole(utilisateur);
+                } catch (SQLException | IOException ex) {
+                    JOptionPane.showMessageDialog(this, "Erreur lors de la récupération de l'utilisateur : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+                }
+                break;
+            case -1:
+                // Utilisateur supprimé
+                JOptionPane.showMessageDialog(this, "Ce compte n'existe pas ou a été supprimé.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                break;
+            case 0:
+                // Utilisateur non trouvé
+                JOptionPane.showMessageDialog(this, "Email ou mot de passe incorrect.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                break;
+            default:
+                // Erreur
+                JOptionPane.showMessageDialog(this, "Erreur lors de la vérification de la connexion.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                break;
         }
     }
         

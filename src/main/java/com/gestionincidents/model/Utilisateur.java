@@ -7,6 +7,7 @@ public class Utilisateur {
     private String email;
     private String motDePasse;
     private String role; // Role est géré dans cette table
+    private boolean estSupprime; // Pour la suppression logique
 
     public Utilisateur() {
     }
@@ -60,4 +61,12 @@ public class Utilisateur {
     public void setRole(String role) {
         this.role = role;
     }
+
+	public boolean isEstSupprime() {
+		return estSupprime;
+	}
+
+	public void setEstSupprime(boolean estSupprime) {
+		this.estSupprime = estSupprime;
+	}
 }

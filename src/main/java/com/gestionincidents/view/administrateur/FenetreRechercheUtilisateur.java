@@ -14,13 +14,15 @@ import java.util.List;
 
 public class FenetreRechercheUtilisateur extends JFrame {
 
-	private static final long serialVersionUID = 1L;
-	private JTextField rechercheField;
+    private static final long serialVersionUID = 1L;
+    private JTextField rechercheField;
     private JRadioButton nomRadioButton;
     private JRadioButton idRadioButton;
     private JTable resultatTable;
     private DefaultTableModel tableModel;
     private UtilisateurController utilisateurController;
+    private JButton modifierButton;
+    private JButton supprimerButton;
 
     public FenetreRechercheUtilisateur(UtilisateurController utilisateurController) {
         this.utilisateurController = utilisateurController;
@@ -48,6 +50,37 @@ public class FenetreRechercheUtilisateur extends JFrame {
         panneauRecherche.add(rechercherButton);
         panneauPrincipal.add(panneauRecherche, BorderLayout.NORTH);
 
+        modifierButton = new JButton("Modifier");
+        supprimerButton = new JButton("Supprimer");
+        JPanel panneauBoutons = new JPanel(new FlowLayout());
+        panneauBoutons.add(modifierButton);
+        panneauBoutons.add(supprimerButton);
+        panneauPrincipal.add(panneauBoutons, BorderLayout.SOUTH);
+
+        // Action du bouton Modifier
+        modifierButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    modifierUtilisateur();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+
+        // Action du bouton Supprimer
+        supprimerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    supprimerUtilisateur();
+                } catch (SQLException | IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+
         // Tableau des résultats
         String[] colonnes = {"ID", "Nom", "Email", "Rôle"};
         tableModel = new DefaultTableModel(colonnes, 0);
@@ -60,11 +93,10 @@ public class FenetreRechercheUtilisateur extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-					rechercherUtilisateur();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+                    rechercherUtilisateur();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
             }
         });
 
@@ -80,16 +112,18 @@ public class FenetreRechercheUtilisateur extends JFrame {
             if (nomRadioButton.isSelected()) {
                 List<Utilisateur> utilisateurs = utilisateurController.rechercherUtilisateursParNom(recherche);
                 for (Utilisateur utilisateur : utilisateurs) {
-                    tableModel.addRow(new Object[]{utilisateur.getId(), utilisateur.getNom(), utilisateur.getEmail(), utilisateur.getRole()});
+                    if (!utilisateur.isEstSupprime()) { // Exclure les utilisateurs supprimés
+                        tableModel.addRow(new Object[]{utilisateur.getId(), utilisateur.getNom(), utilisateur.getEmail(), utilisateur.getRole()});
+                    }
                 }
             } else if (idRadioButton.isSelected()) {
                 try {
                     int id = Integer.parseInt(recherche);
                     Utilisateur utilisateur = utilisateurController.rechercherUtilisateurParId(id);
-                    if (utilisateur != null) {
+                    if (utilisateur != null && !utilisateur.isEstSupprime()) { // Exclure les utilisateurs supprimés
                         tableModel.addRow(new Object[]{utilisateur.getId(), utilisateur.getNom(), utilisateur.getEmail(), utilisateur.getRole()});
                     } else {
-                        JOptionPane.showMessageDialog(this, "Utilisateur non trouvé.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(this, "Utilisateur non trouvé ou supprimé.", "Information", JOptionPane.INFORMATION_MESSAGE);
                     }
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(this, "Veuillez saisir un ID valide.", "Erreur", JOptionPane.ERROR_MESSAGE);
@@ -97,6 +131,44 @@ public class FenetreRechercheUtilisateur extends JFrame {
             }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Erreur lors de la recherche : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void modifierUtilisateur() throws IOException {
+        int ligneSelectionnee = resultatTable.getSelectedRow();
+        if (ligneSelectionnee == -1) {
+            JOptionPane.showMessageDialog(this, "Veuillez sélectionner un utilisateur à modifier.", "Information", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        int idUtilisateur = (int) tableModel.getValueAt(ligneSelectionnee, 0);
+        try {
+            Utilisateur utilisateur = utilisateurController.rechercherUtilisateurParId(idUtilisateur);
+            if (utilisateur != null) {
+                new FenetreModificationUtilisateur(utilisateur, utilisateurController).setVisible(true);
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Erreur lors de la récupération de l'utilisateur : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void supprimerUtilisateur() throws SQLException, IOException {
+        int ligneSelectionnee = resultatTable.getSelectedRow();
+        if (ligneSelectionnee == -1) {
+            JOptionPane.showMessageDialog(this, "Veuillez sélectionner un utilisateur à supprimer.", "Information", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        int idUtilisateur = (int) tableModel.getValueAt(ligneSelectionnee, 0);
+        int reponse = JOptionPane.showConfirmDialog(this, "Êtes-vous sûr de vouloir supprimer cet utilisateur ?", "Confirmation", JOptionPane.YES_NO_OPTION);
+        if (reponse == JOptionPane.YES_OPTION) {
+            try {
+                utilisateurController.supprimerUtilisateur(idUtilisateur);
+                tableModel.removeRow(ligneSelectionnee);
+                JOptionPane.showMessageDialog(this, "Utilisateur supprimé avec succès.", "Information", JOptionPane.INFORMATION_MESSAGE);
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Erreur lors de la suppression de l'utilisateur : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 }

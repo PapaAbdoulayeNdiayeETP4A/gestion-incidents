@@ -76,7 +76,8 @@ public class UtilisateurDAO {
                     utilisateur.setNom(resultat.getString("nom"));
                     utilisateur.setEmail(resultat.getString("email"));
                     utilisateur.setMotDePasse(resultat.getString("mot_de_passe"));
-                    utilisateur.setRole(resultat.getString("role")); // Récupérer le rôle ici
+                    utilisateur.setRole(resultat.getString("role"));
+                    utilisateur.setEstSupprime(resultat.getBoolean("est_supprime")); // Récupérer est_supprime
                     return utilisateur;
                 } else {
                     return null;
@@ -191,6 +192,34 @@ public class UtilisateurDAO {
             throw e;
         }
     }
+    
+    
+    public void supprimerDeveloppeur(int utilisateurId) throws SQLException, IOException {
+        String sql = "DELETE FROM developpeur WHERE utilisateur_id = ?";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql)) {
+            statement.setInt(1, utilisateurId);
+            statement.executeUpdate();
+        }
+    }
+
+    public void supprimerRapporteur(int utilisateurId) throws SQLException, IOException {
+        String sql = "DELETE FROM rapporteur WHERE utilisateur_id = ?";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql)) {
+            statement.setInt(1, utilisateurId);
+            statement.executeUpdate();
+        }
+    }
+
+    public void supprimerResponsable(int utilisateurId) throws SQLException, IOException {
+        String sql = "DELETE FROM responsable WHERE utilisateur_id = ?";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql)) {
+            statement.setInt(1, utilisateurId);
+            statement.executeUpdate();
+        }
+    }
 
     public int getDernierIdUtilisateur() throws SQLException, IOException {
         String sql = "SELECT LAST_INSERT_ID()";
@@ -237,8 +266,17 @@ public class UtilisateurDAO {
         return -1; // Ou lancez une exception si le responsable n'est pas trouvé
     }
     
+    public void supprimerUtilisateur(int id) throws SQLException, IOException {
+        String sql = "UPDATE utilisateur SET est_supprime = TRUE WHERE id = ?";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql)) {
+            statement.setInt(1, id);
+            statement.executeUpdate();
+        }
+    }
+
     public Utilisateur rechercherUtilisateurParId(int id) throws SQLException, IOException {
-        String sql = "SELECT id, nom, email, mot_de_passe, role FROM utilisateur WHERE id = ?";
+        String sql = "SELECT id, nom, email, mot_de_passe, role, est_supprime FROM utilisateur WHERE id = ?";
         try (Connection connexion = ConnexionBD.getConnection();
              PreparedStatement statement = connexion.prepareStatement(sql)) {
             statement.setInt(1, id);
@@ -250,6 +288,7 @@ public class UtilisateurDAO {
                     utilisateur.setEmail(resultat.getString("email"));
                     utilisateur.setMotDePasse(resultat.getString("mot_de_passe"));
                     utilisateur.setRole(resultat.getString("role"));
+                    utilisateur.setEstSupprime(resultat.getBoolean("est_supprime"));
                     return utilisateur;
                 }
                 return null; // Utilisateur non trouvé
@@ -259,7 +298,7 @@ public class UtilisateurDAO {
 
     public List<Utilisateur> rechercherUtilisateursParNom(String nom) throws SQLException, IOException {
         List<Utilisateur> utilisateurs = new ArrayList<>();
-        String sql = "SELECT id, nom, email, mot_de_passe, role FROM utilisateur WHERE nom LIKE ?";
+        String sql = "SELECT id, nom, email, mot_de_passe, role, est_supprime FROM utilisateur WHERE nom LIKE ?";
         try (Connection connexion = ConnexionBD.getConnection();
              PreparedStatement statement = connexion.prepareStatement(sql)) {
             statement.setString(1, "%" + nom + "%"); // Recherche partielle
@@ -271,6 +310,7 @@ public class UtilisateurDAO {
                     utilisateur.setEmail(resultat.getString("email"));
                     utilisateur.setMotDePasse(resultat.getString("mot_de_passe"));
                     utilisateur.setRole(resultat.getString("role"));
+                    utilisateur.setEstSupprime(resultat.getBoolean("est_supprime"));
                     utilisateurs.add(utilisateur);
                 }
                 return utilisateurs;
