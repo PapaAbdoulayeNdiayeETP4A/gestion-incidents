@@ -5,18 +5,18 @@ public class Developpeur extends Utilisateur {
     private String specialisation;
     private String niveau;
     private int anciennete;
-    private Equipe equipe; // Relation avec Equipe
+    private int equipeId; // Modification: Utilisation d'un identifiant d'équipe au lieu de l'objet direct
 
     public Developpeur() {
         super();
     }
 
-    public Developpeur(int id, String nom, String email, String motDePasse, String specialisation, String niveau, int anciennete, Equipe equipe, String role) {
+    public Developpeur(int id, String nom, String email, String motDePasse, String specialisation, String niveau, int anciennete, int equipeId, String role) {
         super(id, nom, email, motDePasse, role);
         this.specialisation = specialisation;
         this.niveau = niveau;
         this.anciennete = anciennete;
-        this.equipe = equipe;
+        this.equipeId = equipeId;
     }
 
     // Getters et setters pour les attributs spécifiques
@@ -45,11 +45,11 @@ public class Developpeur extends Utilisateur {
         this.anciennete = anciennete;
     }
 
-    public Equipe getEquipe() {
-        return equipe;
+    public int getEquipeId() {
+        return equipeId; // Retourne l'ID de l'équipe au lieu de l'objet équipe
     }
 
-    public void setEquipe(Equipe equipe) {
-        this.equipe = equipe;
+    public void setEquipeId(int equipeId) {
+        this.equipeId = equipeId; // Définit l'ID de l'équipe au lieu de l'objet équipe
     }
 }

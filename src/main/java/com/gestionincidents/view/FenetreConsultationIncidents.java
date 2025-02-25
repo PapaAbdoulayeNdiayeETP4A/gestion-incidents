@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
 
 public class FenetreConsultationIncidents extends JFrame {
 
-	private static final long serialVersionUID = 1L;
-	private JTable tableauIncidents;
+    private static final long serialVersionUID = 1L;
+    private JTable tableauIncidents;
     private DefaultTableModel modeleTableau;
     private IncidentController incidentController;
     private CommentaireController commentaireController;
@@ -75,7 +75,6 @@ public class FenetreConsultationIncidents extends JFrame {
                                 new FenetreChangementStatutIncident(incidentId, incidentController).setVisible(true);
                             }
                             mettreAJourTableau(getIncidentsByUserRole());
-
                         }
                     } catch (SQLException | IOException ex) {
                         JOptionPane.showMessageDialog(FenetreConsultationIncidents.this, "Erreur lors de la gestion des incidents : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
@@ -112,16 +111,16 @@ public class FenetreConsultationIncidents extends JFrame {
 
     private List<Incident> getIncidentsByUserRole() throws SQLException, IOException {
         List<Incident> incidents = incidentController.getIncidents();
-		switch (utilisateur.getRole()) {
-		    case "rapporteur":
-		        return incidents.stream()
-		                .filter(incident -> incident.getRapporteur() != null && incident.getRapporteur().getId() == utilisateur.getId())
-		                .collect(Collectors.toList());
-		    case "developpeur":
-		        return incidents.stream()
-		                .filter(incident -> incident.getAssigneA() != null && incident.getAssigneA().getId() == utilisateur.getId())
-		                .collect(Collectors.toList());
-		    case "responsable":
+        switch (utilisateur.getRole()) {
+            case "rapporteur":
+                return incidents.stream()
+                        .filter(incident -> incident.getRapporteur() != null && incident.getRapporteur().getId() == utilisateur.getId())
+                        .collect(Collectors.toList());
+            case "developpeur":
+                return incidents.stream()
+                        .filter(incident -> incident.getAssigneA() != null && incident.getAssigneA().getId() == utilisateur.getId())
+                        .collect(Collectors.toList());
+            case "responsable":
                 // Récupérer les ID des développeurs de l'équipe du responsable
                 UtilisateurDAO utilisateurDAO = new UtilisateurDAO();
                 try {
@@ -133,9 +132,9 @@ public class FenetreConsultationIncidents extends JFrame {
                     JOptionPane.showMessageDialog(this, "Erreur lors de la récupération des développeurs de l'équipe : " + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
                     return new ArrayList<>(); // Retourner une liste vide en cas d'erreur
                 }
-		    default:
-		        return incidents; // Afficher tous les incidents pour les autres rôles
-		}
+            default:
+                return incidents; // Afficher tous les incidents pour les autres rôles
+        }
     }
 
     public void mettreAJourTableau(List<Incident> incidents) {

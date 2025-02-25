@@ -20,7 +20,7 @@ public class FenetreAssignationIncidentResponsable extends JFrame {
     private IncidentController incidentController;
     private UtilisateurController utilisateurController;
 
-    public FenetreAssignationIncidentResponsable(IncidentController incidentController, UtilisateurController utilisateurController) {
+    public FenetreAssignationIncidentResponsable(IncidentController incidentController, UtilisateurController utilisateurController, Utilisateur responsable) {
         this.incidentController = incidentController;
         this.utilisateurController = utilisateurController;
 
@@ -35,9 +35,9 @@ public class FenetreAssignationIncidentResponsable extends JFrame {
         panneauPrincipal.add(new JLabel("Développeur :"));
         developpeurComboBox = new JComboBox<>();
         try {
-            List<Utilisateur> developpeurs = utilisateurController.getUtilisateurs();
+            List<Utilisateur> developpeurs = utilisateurController.getDeveloppeursParEquipe(responsable.getId());
             for (Utilisateur developpeur : developpeurs) {
-                if (developpeur.getRole().equals("developpeur") && !developpeur.isEstSupprime()) {
+                if (!developpeur.isEstSupprime()) {
                     // Vérifier si le développeur a des incidents assignés
                     List<Incident> incidentsAssignes = incidentController.getIncidentsAssignesADeveloppeur(developpeur.getId());
                     if (incidentsAssignes.isEmpty()) {
@@ -48,6 +48,7 @@ public class FenetreAssignationIncidentResponsable extends JFrame {
         } catch (SQLException | IOException ex) {
             JOptionPane.showMessageDialog(this, "Erreur lors de la récupération des développeurs : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
+
         // Personnalisation de l'affichage des développeurs
         developpeurComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
@@ -65,15 +66,17 @@ public class FenetreAssignationIncidentResponsable extends JFrame {
         // Incidents ouverts
         panneauPrincipal.add(new JLabel("Incident :"));
         incidentComboBox = new JComboBox<>();
-     // Dans FenetreAssignationIncidentResponsable.java
         try {
             List<Incident> incidents = incidentController.getIncidentsOuverts();
             for (Incident incident : incidents) {
-                incidentComboBox.addItem(incident);
+                if (incident.getAssigneA() == null || incident.getAssigneA().getId() == 0) {  // Incidents non assignés
+                    incidentComboBox.addItem(incident);
+                }
             }
         } catch (SQLException | IOException ex) {
             JOptionPane.showMessageDialog(this, "Erreur lors de la récupération des incidents : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
+
         // Personnalisation de l'affichage des incidents
         incidentComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
@@ -81,7 +84,7 @@ public class FenetreAssignationIncidentResponsable extends JFrame {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof Incident) {
                     Incident incident = (Incident) value;
-                    setText(incident.getDescription()); // Remplacez getDescription() par l'attribut correct
+                    setText(incident.getDescription()); // Remplacer getDescription() par l'attribut correct
                 }
                 return this;
             }

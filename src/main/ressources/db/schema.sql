@@ -1,10 +1,8 @@
 -- Suppression de la base de données (si elle existe)
 DROP DATABASE IF EXISTS gestion_incidents;
 
--- Création de la base de données (si elle n'existe pas déjà)
+-- Création de la base de données
 CREATE DATABASE IF NOT EXISTS gestion_incidents;
-
--- Utilisation de la base de données
 USE gestion_incidents;
 
 -- Table utilisateur
@@ -12,7 +10,7 @@ CREATE TABLE utilisateur (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nom VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    mot_de_passe VARCHAR(255), -- Mot de passe haché
+    mot_de_passe VARCHAR(255),
     est_supprime BOOLEAN NOT NULL DEFAULT FALSE,
     role VARCHAR(50) -- 'developpeur', 'rapporteur', 'responsable'
 );
@@ -24,11 +22,30 @@ CREATE TABLE administrateur (
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id)
 );
 
+-- Table responsable
+CREATE TABLE responsable (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    utilisateur_id INT UNIQUE NOT NULL,
+    departement VARCHAR(255),
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id)
+);
+
+-- Table rapporteur
+CREATE TABLE rapporteur (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    utilisateur_id INT UNIQUE NOT NULL,
+    service VARCHAR(255),
+    num_matricule VARCHAR(255),
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id)
+);
+
 -- Table equipe
 CREATE TABLE equipe (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nom VARCHAR(255) NOT NULL,
-    description TEXT
+    description TEXT,
+    responsable_id INT, -- Ajout du responsable de l'équipe
+    FOREIGN KEY (responsable_id) REFERENCES responsable(utilisateur_id) -- Lien vers le responsable
 );
 
 -- Table application
@@ -47,8 +64,8 @@ CREATE TABLE incident (
     application_concernee_id INT NOT NULL,
     description TEXT NOT NULL,
     date_signalement DATE NOT NULL,
-    priorite VARCHAR(50) NOT NULL DEFAULT 'MOYENNE', -- 'FAIBLE', 'MOYENNE', 'ELEVEE', 'URGENTE'
-    statut VARCHAR(50) NOT NULL DEFAULT 'OUVERT', -- 'OUVERT', 'EN_COURS', 'RESOLU', 'CLOS'
+    priorite VARCHAR(50) NOT NULL DEFAULT 'MOYENNE',
+    statut VARCHAR(50) NOT NULL DEFAULT 'OUVERT',
     rapporteur_id INT,
     assigne_a_id INT,
     date_cloture DATE,
@@ -75,56 +92,37 @@ CREATE TABLE fichier (
     nom VARCHAR(255),
     date_upload DATETIME,
     uploader_id INT,
-    type VARCHAR(50), -- 'trace', 'image'
-    contenu MEDIUMBLOB, -- Pour les images, ou TEXT pour les traces
+    type VARCHAR(50),
+    contenu MEDIUMBLOB,
     incident_id INT,
-    commentaire_id INT, -- Clé étrangère vers la table commentaire
+    commentaire_id INT,
     FOREIGN KEY (uploader_id) REFERENCES utilisateur(id),
     FOREIGN KEY (incident_id) REFERENCES incident(id),
     FOREIGN KEY (commentaire_id) REFERENCES commentaire(id)
 );
 
--- Table de jointure entre equipe et utilisateur (pour la relation Many-to-Many)
+-- Table de jointure entre equipe et utilisateur
 CREATE TABLE equipe_utilisateur (
     equipe_id INT,
     utilisateur_id INT,
     FOREIGN KEY (equipe_id) REFERENCES equipe(id),
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id),
-    PRIMARY KEY (equipe_id, utilisateur_id) -- Clé primaire composée
+    PRIMARY KEY (equipe_id, utilisateur_id)
 );
 
--- Tables pour les classes filles de Utilisateur
-
-
-CREATE TABLE responsable (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    utilisateur_id INT UNIQUE NOT NULL,
-    departement VARCHAR(255),
-    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id)
-);
-
+-- Table developpeur
 CREATE TABLE developpeur (
     id INT PRIMARY KEY AUTO_INCREMENT,
     utilisateur_id INT UNIQUE NOT NULL,
     specialisation VARCHAR(255),
     niveau VARCHAR(50),
     anciennete INT,
-    equipe_id INT,
-    responsable_id INT, -- Ajout de responsable_id
+    equipe_id INT, -- Toujours lié à une équipe
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id),
-    FOREIGN KEY (equipe_id) REFERENCES equipe(id),
-    FOREIGN KEY (responsable_id) REFERENCES responsable(utilisateur_id) -- Clé étrangère vers la table responsable
+    FOREIGN KEY (equipe_id) REFERENCES equipe(id)
 );
 
-CREATE TABLE rapporteur (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    utilisateur_id INT UNIQUE NOT NULL,
-    service VARCHAR(255),
-    num_matricule VARCHAR(255),
-    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id)
-);
-
--- Tables pour les classes filles de Fichier
+-- Tables pour les fichiers
 CREATE TABLE fichier_trace (
     id INT PRIMARY KEY AUTO_INCREMENT,
     contenu TEXT,
@@ -141,7 +139,7 @@ CREATE TABLE fichier_image (
     FOREIGN KEY (id) REFERENCES fichier(id)
 );
 
--- Index pour améliorer les performances des requêtes
+-- Index pour les performances
 CREATE INDEX idx_incident_rapporteur_id ON incident (rapporteur_id);
 CREATE INDEX idx_incident_assigne_a_id ON incident (assigne_a_id);
 CREATE INDEX idx_commentaire_auteur_id ON commentaire (auteur_id);
