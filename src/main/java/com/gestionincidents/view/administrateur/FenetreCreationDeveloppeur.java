@@ -21,7 +21,6 @@ public class FenetreCreationDeveloppeur extends JFrame {
     private JTextField niveauField;
     private JTextField ancienneteField;
     private JComboBox<String> equipeComboBox;
-    private JComboBox<String> responsableComboBox;
     private UtilisateurController utilisateurController;
     private int utilisateurId;
     private EquipeDAO equipeDAO;
@@ -38,7 +37,7 @@ public class FenetreCreationDeveloppeur extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JPanel panneauPrincipal = new JPanel(new GridLayout(6, 2));
+        JPanel panneauPrincipal = new JPanel(new GridLayout(5, 2)); // Une ligne en moins sans le responsable
         panneauPrincipal.add(new JLabel("Spécialisation :"));
         specialisationField = new JTextField();
         panneauPrincipal.add(specialisationField);
@@ -62,19 +61,6 @@ public class FenetreCreationDeveloppeur extends JFrame {
         }
         panneauPrincipal.add(equipeComboBox);
 
-        // Responsable ComboBox
-        panneauPrincipal.add(new JLabel("Responsable :"));
-        responsableComboBox = new JComboBox<>();
-        try {
-            List<Utilisateur> responsables = utilisateurDAO.getAllResponsables();
-            for (Utilisateur responsable : responsables) {
-                responsableComboBox.addItem(responsable.getNom());
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Erreur lors de la récupération des responsables : " + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
-        }
-        panneauPrincipal.add(responsableComboBox);
-
         JButton creerButton = new JButton("Créer");
         creerButton.addActionListener(new ActionListener() {
             @Override
@@ -94,9 +80,12 @@ public class FenetreCreationDeveloppeur extends JFrame {
 
     private void createDeveloppeur() throws NumberFormatException, IOException {
         try {
-            // Récupérer les IDs à partir des noms sélectionnés
+            // Récupérer l'ID de l'équipe sélectionnée
             int equipeId = equipeDAO.getEquipeIdByName((String) equipeComboBox.getSelectedItem());
-            int responsableId = utilisateurDAO.getResponsableIdByName((String) responsableComboBox.getSelectedItem());
+
+            // Récupérer le responsable de l'équipe (automatiquement lié à l'équipe)
+            Utilisateur responsable = equipeDAO.getResponsableByEquipeId(equipeId); // Méthode pour récupérer le responsable de l'équipe
+            int responsableId = responsable.getId();
 
             utilisateurController.createDeveloppeur(utilisateurId, specialisationField.getText(), niveauField.getText(), Integer.parseInt(ancienneteField.getText()), equipeId, responsableId);
             JOptionPane.showMessageDialog(this, "Informations développeur enregistrées.");

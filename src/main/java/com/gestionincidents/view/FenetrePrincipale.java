@@ -129,7 +129,7 @@ public class FenetrePrincipale extends JFrame {
                             return;
                         }
 
-                        new FenetreAssignationIncidentResponsable(incidentController, utilisateurController).setVisible(true);
+                        new FenetreAssignationIncidentResponsable(incidentController, utilisateurController, utilisateur).setVisible(true);
 
                     } catch (SQLException | IOException ex) {
                         ex.printStackTrace();

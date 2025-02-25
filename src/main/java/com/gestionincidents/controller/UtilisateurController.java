@@ -41,15 +41,27 @@ public class UtilisateurController {
     }
     
     public void createDeveloppeur(int utilisateurId, String specialisation, String niveau, int anciennete, int equipeId, int responsableId) throws SQLException, IOException {
-        utilisateurDAO.createDeveloppeur(utilisateurId, specialisation, niveau, anciennete, equipeId, responsableId);
+        if (equipeId > 0 && responsableId > 0) {
+            utilisateurDAO.createDeveloppeur(utilisateurId, specialisation, niveau, anciennete, equipeId);
+        } else {
+            logger.error("Équipe ou responsable invalide pour le développeur.");
+        }
     }
 
     public void createRapporteur(int utilisateurId, String service, String numMatricule) throws SQLException, IOException {
-        utilisateurDAO.createRapporteur(utilisateurId, service, numMatricule);
+        if (service != null && numMatricule != null) {
+            utilisateurDAO.createRapporteur(utilisateurId, service, numMatricule);
+        } else {
+            logger.error("Service ou numéro matricule invalide pour le rapporteur.");
+        }
     }
 
-    public void createResponsable(int utilisateurId, String departement) throws SQLException, IOException {
-        utilisateurDAO.createResponsable(utilisateurId, departement);
+    public void createResponsable(int utilisateurId, String departement, int equipeId) throws SQLException, IOException {
+        if (departement != null) {
+            utilisateurDAO.createResponsable(utilisateurId, departement, equipeId);
+        } else {
+            logger.error("Département invalide pour le responsable.");
+        }
     }
 
     public void updateUtilisateur(Utilisateur utilisateur) {
@@ -62,12 +74,12 @@ public class UtilisateurController {
 
     public void deleteUtilisateur(int id) {
         try {
-            utilisateurDAO.deleteUtilisateur(id);
+            utilisateurDAO.supprimerUtilisateur(id);
         } catch (SQLException | IOException e) {
             logger.error("Erreur lors de la suppression de l'utilisateur " + id + " : " + e.getMessage());
         }
     }
-    
+
     public Utilisateur rechercherUtilisateurParId(int id) throws SQLException, IOException {
         return utilisateurDAO.rechercherUtilisateurParId(id);
     }
@@ -85,15 +97,25 @@ public class UtilisateurController {
                 }
                 return 1; // Connexion réussie;
             } else {
-            	return 0;
+                return 0;
             }
         } catch (SQLException | IOException ex) {
-            ex.printStackTrace();
+            logger.error("Erreur lors de la vérification de la connexion : " + ex.getMessage());
         }
         return 0;
     }
-    
+
     public void supprimerUtilisateur(int id) throws SQLException, IOException {
-        utilisateurDAO.supprimerUtilisateur(id);
+        try {
+            utilisateurDAO.supprimerUtilisateur(id);
+        } catch (SQLException | IOException e) {
+            logger.error("Erreur lors de la suppression de l'utilisateur " + id + " : " + e.getMessage());
+        }
     }
+
+	public List<Utilisateur> getDeveloppeursParEquipe(int id) throws SQLException, IOException {
+		return utilisateurDAO.getDeveloppeursParEquipe(id);
+	}
+    
+    
 }

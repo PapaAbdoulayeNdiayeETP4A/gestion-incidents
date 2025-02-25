@@ -5,11 +5,7 @@ import com.gestionincidents.utils.ConnexionBD;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -90,32 +86,16 @@ public class UtilisateurDAO {
             throw e;
         }
     }
-    
-    public List<Integer> getDeveloppeurIdsByResponsableId(int responsableId) throws SQLException, IOException {
-        List<Integer> developpeurIds = new ArrayList<>();
-        try (Connection connexion = ConnexionBD.getConnection();
-             PreparedStatement statement = connexion.prepareStatement("SELECT utilisateur_id FROM developpeur WHERE responsable_id = ?")) {
-            statement.setInt(1, responsableId);
-            try (ResultSet resultat = statement.executeQuery()) {
-                while (resultat.next()) {
-                    developpeurIds.add(resultat.getInt("utilisateur_id"));
-                }
-            }
-        } catch (SQLException e) {
-            logger.error("Erreur lors de la récupération des développeurs de l'équipe : " + e.getMessage());
-            throw e;
-        }
-        return developpeurIds;
-    }
 
     public int createUtilisateur(Utilisateur utilisateur) throws SQLException, IOException {
-        String sql = "INSERT INTO utilisateur (nom, email, mot_de_passe, role) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO utilisateur (nom, email, mot_de_passe, role, est_supprime) VALUES (?, ?, ?, ?, ?)";
         try (Connection connexion = ConnexionBD.getConnection();
              PreparedStatement statement = connexion.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) { // Récupérer les clés générées
             statement.setString(1, utilisateur.getNom());
             statement.setString(2, utilisateur.getEmail());
             statement.setString(3, utilisateur.getMotDePasse());
             statement.setString(4, utilisateur.getRole());
+            statement.setBoolean(5, utilisateur.isEstSupprime());
             statement.executeUpdate();
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
@@ -127,9 +107,43 @@ public class UtilisateurDAO {
             }
         }
     }
-    
-    public void createDeveloppeur(int utilisateurId, String specialisation, String niveau, int anciennete, int equipeId, int responsableId) throws SQLException, IOException {
-        String sql = "INSERT INTO developpeur (utilisateur_id, specialisation, niveau, anciennete, equipe_id, responsable_id) VALUES (?, ?, ?, ?, ?, ?)";
+
+    public void createResponsable(int utilisateurId, String departement, int equipeId) throws SQLException, IOException {
+        // Création du responsable
+        String sql = "INSERT INTO responsable (utilisateur_id, departement) VALUES (?, ?)";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            statement.setInt(1, utilisateurId);
+            statement.setString(2, departement);
+            statement.executeUpdate();
+
+            // Récupérer l'ID du responsable créé
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int responsableId = generatedKeys.getInt(1);
+
+                    // Associer le responsable à l'équipe
+                    associerResponsableAEquipe(responsableId, equipeId);
+                } else {
+                    throw new SQLException("Échec de la récupération de l'ID du responsable.");
+                }
+            }
+        }
+    }
+
+    public void associerResponsableAEquipe(int responsableId, int equipeId) throws SQLException, IOException {
+        String sql = "UPDATE equipe SET responsable_id = ? WHERE id = ?";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql)) {
+            statement.setInt(1, responsableId);
+            statement.setInt(2, equipeId);
+            statement.executeUpdate();
+        }
+    }
+
+
+    public void createDeveloppeur(int utilisateurId, String specialisation, String niveau, int anciennete, int equipeId) throws SQLException, IOException {
+        String sql = "INSERT INTO developpeur (utilisateur_id, specialisation, niveau, anciennete, equipe_id) VALUES (?, ?, ?, ?, ?)";
         try (Connection connexion = ConnexionBD.getConnection();
              PreparedStatement statement = connexion.prepareStatement(sql)) {
             statement.setInt(1, utilisateurId);
@@ -137,7 +151,6 @@ public class UtilisateurDAO {
             statement.setString(3, niveau);
             statement.setInt(4, anciennete);
             statement.setInt(5, equipeId);
-            statement.setInt(6, responsableId);
             statement.executeUpdate();
         }
     }
@@ -153,27 +166,18 @@ public class UtilisateurDAO {
         }
     }
 
-    public void createResponsable(int utilisateurId, String departement) throws SQLException, IOException {
-        String sql = "INSERT INTO responsable (utilisateur_id, departement) VALUES (?, ?)";
-        try (Connection connexion = ConnexionBD.getConnection();
-             PreparedStatement statement = connexion.prepareStatement(sql)) {
-            statement.setInt(1, utilisateurId);
-            statement.setString(2, departement);
-            statement.executeUpdate();
-        }
-    }
-
     public void updateUtilisateur(Utilisateur utilisateur) throws SQLException, IOException {
         Connection connexion = null;
         try {
             connexion = ConnexionBD.getConnection();
-            String sql = "UPDATE utilisateur SET nom = ?, email = ?, mot_de_passe = ?, role = ? WHERE id = ?";
+            String sql = "UPDATE utilisateur SET nom = ?, email = ?, mot_de_passe = ?, role = ?, est_supprime = ? WHERE id = ?";
             PreparedStatement statement = connexion.prepareStatement(sql);
             statement.setString(1, utilisateur.getNom());
             statement.setString(2, utilisateur.getEmail());
             statement.setString(3, utilisateur.getMotDePasse());
             statement.setString(4, utilisateur.getRole());
-            statement.setInt(5, utilisateur.getId());
+            statement.setBoolean(5, utilisateur.isEstSupprime());
+            statement.setInt(6, utilisateur.getId());
             statement.executeUpdate();
             logger.info("Utilisateur mis à jour : " + utilisateur.getNom());
         } catch (SQLException | IOException e) {
@@ -182,94 +186,6 @@ public class UtilisateurDAO {
         }
     }
 
-    public void deleteUtilisateur(int id) throws SQLException, IOException {
-        Connection connexion = null;
-        try {
-            connexion = ConnexionBD.getConnection();
-            String sql = "DELETE FROM utilisateur WHERE id = ?";
-            PreparedStatement statement = connexion.prepareStatement(sql);
-            statement.setInt(1, id);
-            statement.executeUpdate();
-            logger.info("Utilisateur supprimé : " + id);
-        } catch (SQLException | IOException e) {
-            logger.error("Erreur lors de la suppression de l'utilisateur " + id + " : " + e.getMessage());
-            throw e;
-        }
-    }
-    
-    
-    public void supprimerDeveloppeur(int utilisateurId) throws SQLException, IOException {
-        String sql = "DELETE FROM developpeur WHERE utilisateur_id = ?";
-        try (Connection connexion = ConnexionBD.getConnection();
-             PreparedStatement statement = connexion.prepareStatement(sql)) {
-            statement.setInt(1, utilisateurId);
-            statement.executeUpdate();
-        }
-    }
-
-    public void supprimerRapporteur(int utilisateurId) throws SQLException, IOException {
-        String sql = "DELETE FROM rapporteur WHERE utilisateur_id = ?";
-        try (Connection connexion = ConnexionBD.getConnection();
-             PreparedStatement statement = connexion.prepareStatement(sql)) {
-            statement.setInt(1, utilisateurId);
-            statement.executeUpdate();
-        }
-    }
-
-    public void supprimerResponsable(int utilisateurId) throws SQLException, IOException {
-        String sql = "DELETE FROM responsable WHERE utilisateur_id = ?";
-        try (Connection connexion = ConnexionBD.getConnection();
-             PreparedStatement statement = connexion.prepareStatement(sql)) {
-            statement.setInt(1, utilisateurId);
-            statement.executeUpdate();
-        }
-    }
-
-    public int getDernierIdUtilisateur() throws SQLException, IOException {
-        String sql = "SELECT LAST_INSERT_ID()";
-        try (Connection connexion = ConnexionBD.getConnection();
-             PreparedStatement statement = connexion.prepareStatement(sql);
-             ResultSet resultat = statement.executeQuery()) {
-            if (resultat.next()) {
-                return resultat.getInt(1);
-            }
-            return -1; // Ou lancez une exception si aucun ID n'est trouvé
-        }
-    }
-    
-    public List<Utilisateur> getAllResponsables() throws SQLException, IOException {
-        List<Utilisateur> responsables = new ArrayList<>();
-        String sql = "SELECT u.id, u.nom, u.email, u.mot_de_passe, u.role FROM utilisateur u INNER JOIN responsable r ON u.id = r.utilisateur_id";
-        try (Connection connexion = ConnexionBD.getConnection();
-             PreparedStatement statement = connexion.prepareStatement(sql);
-             ResultSet resultat = statement.executeQuery()) {
-            while (resultat.next()) {
-                Utilisateur responsable = new Utilisateur();
-                responsable.setId(resultat.getInt("id"));
-                responsable.setNom(resultat.getString("nom"));
-                responsable.setEmail(resultat.getString("email"));
-                responsable.setMotDePasse(resultat.getString("mot_de_passe"));
-                responsable.setRole(resultat.getString("role"));
-                responsables.add(responsable);
-            }
-        }
-        return responsables;
-    }
-
-    public int getResponsableIdByName(String nomResponsable) throws SQLException, IOException {
-        String sql = "SELECT u.id FROM utilisateur u INNER JOIN responsable r ON u.id = r.utilisateur_id WHERE u.nom = ?";
-        try (Connection connexion = ConnexionBD.getConnection();
-             PreparedStatement statement = connexion.prepareStatement(sql)) {
-            statement.setString(1, nomResponsable);
-            try (ResultSet resultat = statement.executeQuery()) {
-                if (resultat.next()) {
-                    return resultat.getInt("id");
-                }
-            }
-        }
-        return -1; // Ou lancez une exception si le responsable n'est pas trouvé
-    }
-    
     public void supprimerUtilisateur(int id) throws SQLException, IOException {
         String sql = "UPDATE utilisateur SET est_supprime = TRUE WHERE id = ?";
         try (Connection connexion = ConnexionBD.getConnection();
@@ -278,47 +194,120 @@ public class UtilisateurDAO {
             statement.executeUpdate();
         }
     }
+    
+    // Cette méthode récupère les IDs des développeurs qui sont assignés à un responsable
+    public List<Integer> getDeveloppeurIdsByResponsableId(int responsableId) throws SQLException {
+        List<Integer> developpeurIds = new ArrayList<>();
+        String query = "SELECT d.id FROM developpeur d " +
+                       "JOIN utilisateur u ON d.utilisateur_id = u.id " +
+                       "WHERE d.equipe_id IN (SELECT e.id FROM equipe e WHERE e.responsable_id = ?)";
 
-    public Utilisateur rechercherUtilisateurParId(int id) throws SQLException, IOException {
-        String sql = "SELECT id, nom, email, mot_de_passe, role, est_supprime FROM utilisateur WHERE id = ?";
-        try (Connection connexion = ConnexionBD.getConnection();
-             PreparedStatement statement = connexion.prepareStatement(sql)) {
-            statement.setInt(1, id);
-            try (ResultSet resultat = statement.executeQuery()) {
-                if (resultat.next()) {
-                    Utilisateur utilisateur = new Utilisateur();
-                    utilisateur.setId(resultat.getInt("id"));
-                    utilisateur.setNom(resultat.getString("nom"));
-                    utilisateur.setEmail(resultat.getString("email"));
-                    utilisateur.setMotDePasse(resultat.getString("mot_de_passe"));
-                    utilisateur.setRole(resultat.getString("role"));
-                    utilisateur.setEstSupprime(resultat.getBoolean("est_supprime"));
-                    return utilisateur;
-                }
-                return null; // Utilisateur non trouvé
+        try (PreparedStatement stmt = ConnexionBD.getConnection().prepareStatement(query)) {
+            stmt.setInt(1, responsableId); // On lie l'ID du responsable à la requête
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                developpeurIds.add(rs.getInt("id"));
             }
+        } catch (SQLException | IOException e) {
+            throw new SQLException("Erreur lors de la récupération des développeurs : " + e.getMessage(), e);
+        }
+
+        return developpeurIds;
+    }
+    
+    public int getResponsableIdByName(String nom) throws SQLException {
+        String query = "SELECT r.id FROM responsable r " +
+                       "JOIN utilisateur u ON r.utilisateur_id = u.id " +  // Utilisation de 'utilisateur_id' dans 'responsable'
+                       "WHERE u.nom = ?";  // Recherche du responsable par le nom dans la table utilisateur
+        try (PreparedStatement stmt = ConnexionBD.getConnection().prepareStatement(query)) {
+            stmt.setString(1, nom);  // On lie le nom du responsable à la requête
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");  // Retourne l'ID du responsable
+            } else {
+                throw new SQLException("Aucun responsable trouvé avec ce nom.");
+            }
+        } catch (SQLException | IOException e) {
+            throw new SQLException("Erreur lors de la récupération de l'ID du responsable : " + e.getMessage(), e);
         }
     }
 
+    public Utilisateur rechercherUtilisateurParId(int idUtilisateur) throws SQLException, IOException {
+        Utilisateur utilisateur = null;
+        String sql = "SELECT * FROM utilisateur WHERE id = ? AND est_supprime = FALSE"; // Ne récupère que les utilisateurs non supprimés
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql)) {
+            statement.setInt(1, idUtilisateur);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    // Récupérer les données de l'utilisateur depuis le résultat de la requête
+                    utilisateur = new Utilisateur();
+                    utilisateur.setId(rs.getInt("id"));
+                    utilisateur.setNom(rs.getString("nom"));
+                    utilisateur.setEmail(rs.getString("email"));
+                    utilisateur.setMotDePasse(rs.getString("mot_de_passe"));
+                    utilisateur.setRole(rs.getString("role"));
+                    // Assure-toi que tous les champs nécessaires de l'utilisateur sont récupérés
+                }
+            }
+        }
+        return utilisateur;
+    }
+    
+    
     public List<Utilisateur> rechercherUtilisateursParNom(String nom) throws SQLException, IOException {
         List<Utilisateur> utilisateurs = new ArrayList<>();
-        String sql = "SELECT id, nom, email, mot_de_passe, role, est_supprime FROM utilisateur WHERE nom LIKE ?";
-        try (Connection connexion = ConnexionBD.getConnection();
-             PreparedStatement statement = connexion.prepareStatement(sql)) {
-            statement.setString(1, "%" + nom + "%"); // Recherche partielle
-            try (ResultSet resultat = statement.executeQuery()) {
-                while (resultat.next()) {
-                    Utilisateur utilisateur = new Utilisateur();
-                    utilisateur.setId(resultat.getInt("id"));
-                    utilisateur.setNom(resultat.getString("nom"));
-                    utilisateur.setEmail(resultat.getString("email"));
-                    utilisateur.setMotDePasse(resultat.getString("mot_de_passe"));
-                    utilisateur.setRole(resultat.getString("role"));
-                    utilisateur.setEstSupprime(resultat.getBoolean("est_supprime"));
-                    utilisateurs.add(utilisateur);
-                }
-                return utilisateurs;
+        
+        String query = "SELECT * FROM utilisateur WHERE nom LIKE ?";
+        
+        try (PreparedStatement stmt = ConnexionBD.getConnection().prepareStatement(query)) {
+            stmt.setString(1, "%" + nom + "%");
+            
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                Utilisateur utilisateur = new Utilisateur();
+                utilisateur.setId(rs.getInt("id"));
+                utilisateur.setNom(rs.getString("nom"));
+                utilisateur.setEmail(rs.getString("email"));
+                utilisateur.setMotDePasse(rs.getString("mot_de_passe"));
+                utilisateur.setEstSupprime(rs.getBoolean("est_supprime"));
+                utilisateur.setRole(rs.getString("role"));
+                utilisateurs.add(utilisateur);
             }
         }
+        
+        return utilisateurs;
     }
+    
+    
+    public List<Utilisateur> getDeveloppeursParEquipe(int responsableId) throws SQLException, IOException {
+        List<Utilisateur> developpeurs = new ArrayList<>();
+        String query = "SELECT u.id, u.nom, u.email, u.role " +
+                       "FROM utilisateur u " +
+                       "JOIN developpeur d ON u.id = d.utilisateur_id " +
+                       "JOIN equipe e ON d.equipe_id = e.id " +
+                       "WHERE e.responsable_id = ?";
+        
+        try (PreparedStatement statement = ConnexionBD.getConnection().prepareStatement(query)) {
+            
+            statement.setInt(1, responsableId);
+            ResultSet resultSet = statement.executeQuery();
+            
+            while (resultSet.next()) {
+                Utilisateur utilisateur = new Utilisateur();
+                utilisateur.setId(resultSet.getInt("id"));
+                utilisateur.setNom(resultSet.getString("nom"));
+                utilisateur.setEmail(resultSet.getString("email"));
+                utilisateur.setRole(resultSet.getString("role"));
+                developpeurs.add(utilisateur);
+            }
+        }
+        return developpeurs;
+    }
+
+
+
 }
