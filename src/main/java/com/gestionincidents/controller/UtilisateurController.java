@@ -36,12 +36,8 @@ public class UtilisateurController {
         }
     }
 
-    public void createUtilisateur(Utilisateur utilisateur) {
-        try {
-            utilisateurDAO.createUtilisateur(utilisateur);
-        } catch (SQLException | IOException e) {
-            logger.error("Erreur lors de la création de l'utilisateur : " + e.getMessage());
-        }
+    public int createUtilisateur(Utilisateur utilisateur) throws SQLException, IOException {
+        return utilisateurDAO.createUtilisateur(utilisateur);
     }
     
     public void createDeveloppeur(int utilisateurId, String specialisation, String niveau, int anciennete, int equipeId, int responsableId) throws SQLException, IOException {

@@ -187,5 +187,47 @@ public class IncidentDAO {
         }
     }
 
-    // ... (autres méthodes)
+    public List<Incident> getIncidentsOuverts() throws SQLException, IOException {
+        List<Incident> incidents = new ArrayList<>();
+        String sql = "SELECT * FROM incident WHERE statut = 'OUVERT' AND assigne_a_id IS NULL";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql);
+             ResultSet resultat = statement.executeQuery()) {
+            while (resultat.next()) {
+                Incident incident = new Incident();
+                incident.setId(resultat.getInt("id"));
+                incident.setDescription(resultat.getString("description"));
+                incidents.add(incident);
+            }
+        }
+        return incidents;
+    }
+
+    public List<Incident> getIncidentsAssignesADeveloppeur(int developpeurId) throws SQLException, IOException {
+        List<Incident> incidents = new ArrayList<>();
+        String sql = "SELECT * FROM incident WHERE assigne_a_id = ?";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql)) {
+            statement.setInt(1, developpeurId);
+            try (ResultSet resultat = statement.executeQuery()) {
+                while (resultat.next()) {
+                    Incident incident = new Incident();
+                    incident.setId(resultat.getInt("id"));
+                    // ... (récupérer les autres champs)
+                    incidents.add(incident);
+                }
+            }
+        }
+        return incidents;
+    }
+
+    public void assignerIncidentADeveloppeur(int incidentId, int developpeurId) throws SQLException, IOException {
+        String sql = "UPDATE incident SET assigne_a_id = ?, statut = 'EN_COURS' WHERE id = ?";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql)) {
+            statement.setInt(1, developpeurId);
+            statement.setInt(2, incidentId);
+            statement.executeUpdate();
+        }
+    }
 }

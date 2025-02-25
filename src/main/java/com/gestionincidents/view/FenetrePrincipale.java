@@ -1,11 +1,14 @@
 package com.gestionincidents.view;
 
+import com.gestionincidents.controller.IncidentController;
 import com.gestionincidents.controller.UtilisateurController;
+import com.gestionincidents.model.Incident;
 import com.gestionincidents.model.Utilisateur;
 import com.gestionincidents.view.administrateur.FenetreCreationUtilisateur;
 import com.gestionincidents.view.administrateur.FenetreListeUtilisateurs;
 import com.gestionincidents.view.administrateur.FenetreRechercheUtilisateur;
 import com.gestionincidents.view.rapporteur.FenetreCreationIncidentRapporteur;
+import com.gestionincidents.view.responsable.FenetreAssignationIncidentResponsable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +16,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
+
 
 public class FenetrePrincipale extends JFrame {
 
@@ -81,7 +86,9 @@ public class FenetrePrincipale extends JFrame {
 
         } else if (utilisateur.getRole().equals("responsable")) {
             JButton boutonConsulterIncidents = new JButton("Consulter les incidents");
+            JButton buttonAssignerIncident = new JButton("Assigner un incident");
             panneauPrincipal.add(boutonConsulterIncidents);
+            panneauPrincipal.add(buttonAssignerIncident);
             boutonConsulterIncidents.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -92,6 +99,45 @@ public class FenetrePrincipale extends JFrame {
                     }
                 }
             });
+            
+            buttonAssignerIncident.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        IncidentController incidentController = new IncidentController(); // Instance locale
+                        UtilisateurController utilisateurController = new UtilisateurController(); // Instance locale manquante
+
+                        List<Utilisateur> developpeurs = utilisateurController.getUtilisateurs();
+                        List<Incident> incidents = incidentController.getIncidentsOuverts();
+
+                        boolean developpeurDisponible = developpeurs.stream()
+                            .filter(dev -> "developpeur".equals(dev.getRole()) && !dev.isEstSupprime())
+                            .anyMatch(dev -> {
+                                try {
+                                    return incidentController.getIncidentsAssignesADeveloppeur(dev.getId()).isEmpty();
+                                } catch (SQLException | IOException ex) {
+                                    ex.printStackTrace();
+                                    return false;
+                                }
+                            });
+
+                        boolean incidentDisponible =  incidents != null && !incidents.isEmpty();
+
+                        if (!developpeurDisponible || !incidentDisponible) {
+                            String message = "Aucun incident disponible ou tous les développeurs ont été assignés.";
+                            JOptionPane.showMessageDialog(null, message, "Erreur", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+
+                        new FenetreAssignationIncidentResponsable(incidentController, utilisateurController).setVisible(true);
+
+                    } catch (SQLException | IOException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(null, "Erreur d'ouverture : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            });
+
         } else if (utilisateur.getRole().equals("administrateur")) {
             JButton boutonCreerUtilisateur = new JButton("Créer un utilisateur");
             JButton rechercherUtilisateur = new JButton("Rechercher utilisateur");
