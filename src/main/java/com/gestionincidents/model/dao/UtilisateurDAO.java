@@ -20,7 +20,7 @@ public class UtilisateurDAO {
     public List<Utilisateur> getUtilisateurs() throws SQLException, IOException {
         List<Utilisateur> utilisateurs = new ArrayList<>();
         try (Connection connexion = ConnexionBD.getConnection();
-             PreparedStatement statement = connexion.prepareStatement("SELECT * FROM utilisateur");
+             PreparedStatement statement = connexion.prepareStatement("SELECT id, nom, email, mot_de_passe, role, est_supprime FROM utilisateur");
              ResultSet resultat = statement.executeQuery()) {
 
             while (resultat.next()) {
@@ -29,7 +29,8 @@ public class UtilisateurDAO {
                 utilisateur.setNom(resultat.getString("nom"));
                 utilisateur.setEmail(resultat.getString("email"));
                 utilisateur.setMotDePasse(resultat.getString("mot_de_passe"));
-                utilisateur.setRole(resultat.getString("role")); // Récupérer le rôle ici
+                utilisateur.setRole(resultat.getString("role"));
+                utilisateur.setEstSupprime(resultat.getBoolean("est_supprime")); // Récupérer est_supprime
                 utilisateurs.add(utilisateur);
             }
             logger.info("Récupération des utilisateurs depuis la base de données.");
