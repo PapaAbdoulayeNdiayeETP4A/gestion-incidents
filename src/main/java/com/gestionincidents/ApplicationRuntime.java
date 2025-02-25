@@ -1,6 +1,8 @@
-package com.gestionincidents.view;
+package com.gestionincidents;
 
 import javax.swing.SwingUtilities;
+
+import com.gestionincidents.view.FenetreConnexion;
 
 public class ApplicationRuntime {
 

@@ -3,6 +3,7 @@ package com.gestionincidents.view;
 import com.gestionincidents.controller.UtilisateurController;
 import com.gestionincidents.model.Utilisateur;
 import com.gestionincidents.view.administrateur.FenetreCreationUtilisateur;
+import com.gestionincidents.view.administrateur.FenetreListeUtilisateurs;
 import com.gestionincidents.view.administrateur.FenetreRechercheUtilisateur;
 import com.gestionincidents.view.rapporteur.FenetreCreationIncidentRapporteur;
 
@@ -94,8 +95,10 @@ public class FenetrePrincipale extends JFrame {
         } else if (utilisateur.getRole().equals("administrateur")) {
             JButton boutonCreerUtilisateur = new JButton("Créer un utilisateur");
             JButton rechercherUtilisateur = new JButton("Rechercher utilisateur");
+            JButton listeUtilisateursButton = new JButton("Liste des utilisateurs");
             panneauPrincipal.add(boutonCreerUtilisateur);
             panneauPrincipal.add(rechercherUtilisateur);
+            panneauPrincipal.add(listeUtilisateursButton);
             boutonCreerUtilisateur.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -119,6 +122,18 @@ public class FenetrePrincipale extends JFrame {
                         ex.printStackTrace();
                         JOptionPane.showMessageDialog(FenetrePrincipale.this, "Erreur lors de l'ouverture de la fenêtre de recherche : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
                     }
+                }
+            });
+            listeUtilisateursButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                	UtilisateurController utilisateurController = new UtilisateurController();
+                    try {
+						new FenetreListeUtilisateurs(utilisateurController).setVisible(true);
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
                 }
             });
         }
