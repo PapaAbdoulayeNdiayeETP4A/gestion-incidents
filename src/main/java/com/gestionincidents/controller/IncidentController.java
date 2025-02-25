@@ -78,4 +78,16 @@ public class IncidentController {
             throw e;
         }
     }
+    
+    public List<Incident> getIncidentsOuverts() throws SQLException, IOException {
+        return incidentDAO.getIncidentsOuverts();
+    }
+
+    public List<Incident> getIncidentsAssignesADeveloppeur(int developpeurId) throws SQLException, IOException {
+        return incidentDAO.getIncidentsAssignesADeveloppeur(developpeurId);
+    }
+
+    public void assignerIncidentADeveloppeur(int incidentId, int developpeurId) throws SQLException, IOException {
+        incidentDAO.assignerIncidentADeveloppeur(incidentId, developpeurId);
+    }
 }

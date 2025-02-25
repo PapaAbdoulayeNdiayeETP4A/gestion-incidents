@@ -13,6 +13,7 @@ CREATE TABLE utilisateur (
     nom VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     mot_de_passe VARCHAR(255), -- Mot de passe haché
+    est_supprime BOOLEAN NOT NULL DEFAULT FALSE,
     role VARCHAR(50) -- 'developpeur', 'rapporteur', 'responsable'
 );
 
@@ -80,8 +81,7 @@ CREATE TABLE fichier (
     commentaire_id INT, -- Clé étrangère vers la table commentaire
     FOREIGN KEY (uploader_id) REFERENCES utilisateur(id),
     FOREIGN KEY (incident_id) REFERENCES incident(id),
-    FOREIGN KEY (commentaire_id) REFERENCES commentaire(id),
-    CONSTRAINT check_incident_commentaire CHECK ((incident_id IS NOT NULL AND commentaire_id IS NULL) OR (incident_id IS NULL AND commentaire_id IS NOT NULL))
+    FOREIGN KEY (commentaire_id) REFERENCES commentaire(id)
 );
 
 -- Table de jointure entre equipe et utilisateur (pour la relation Many-to-Many)
@@ -94,6 +94,15 @@ CREATE TABLE equipe_utilisateur (
 );
 
 -- Tables pour les classes filles de Utilisateur
+
+
+CREATE TABLE responsable (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    utilisateur_id INT UNIQUE NOT NULL,
+    departement VARCHAR(255),
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id)
+);
+
 CREATE TABLE developpeur (
     id INT PRIMARY KEY AUTO_INCREMENT,
     utilisateur_id INT UNIQUE NOT NULL,
@@ -112,13 +121,6 @@ CREATE TABLE rapporteur (
     utilisateur_id INT UNIQUE NOT NULL,
     service VARCHAR(255),
     num_matricule VARCHAR(255),
-    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id)
-);
-
-CREATE TABLE responsable (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    utilisateur_id INT UNIQUE NOT NULL,
-    departement VARCHAR(255),
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id)
 );
 

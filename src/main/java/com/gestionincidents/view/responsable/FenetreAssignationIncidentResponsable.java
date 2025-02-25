@@ -4,82 +4,134 @@ import com.gestionincidents.controller.IncidentController;
 import com.gestionincidents.controller.UtilisateurController;
 import com.gestionincidents.model.Incident;
 import com.gestionincidents.model.Utilisateur;
-
+import com.gestionincidents.model.Statut;
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class FenetreAssignationIncidentResponsable extends JFrame {
 
-	private static final long serialVersionUID = 1L;
-	private JComboBox<Incident> comboIncident;
-    private JComboBox<Utilisateur> comboDeveloppeur;
+    private JComboBox<Utilisateur> developpeurComboBox;
+    private JComboBox<Incident> incidentComboBox;
     private IncidentController incidentController;
     private UtilisateurController utilisateurController;
 
-    public FenetreAssignationIncidentResponsable() throws SQLException, IOException {
-        this.incidentController = new IncidentController();
-        this.utilisateurController = new UtilisateurController();
+    public FenetreAssignationIncidentResponsable(IncidentController incidentController, UtilisateurController utilisateurController) {
+        this.incidentController = incidentController;
+        this.utilisateurController = utilisateurController;
 
-        setTitle("Assignation d'un Incident (Responsable)");
+        setTitle("Assigner un incident");
         setSize(400, 200);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JPanel panneauPrincipal = new JPanel(new GridLayout(0, 2));
-        add(panneauPrincipal);
+        JPanel panneauPrincipal = new JPanel(new GridLayout(3, 2));
 
-        // Composants
-        JLabel labelIncident = new JLabel("Incident :");
-        comboIncident = new JComboBox<>();
-        List<Incident> incidents = incidentController.getIncidents();
-		for (Incident incident : incidents) {
-		    comboIncident.addItem(incident);
-		}
-
-        JLabel labelDeveloppeur = new JLabel("Développeur :");
-        comboDeveloppeur = new JComboBox<>();
+        // Développeurs
+        panneauPrincipal.add(new JLabel("Développeur :"));
+        developpeurComboBox = new JComboBox<>();
         try {
-            List<Utilisateur> developpeurs = utilisateurController.getUtilisateurs().stream()
-                    .filter(utilisateur -> "Développeur".equals(utilisateur.getRole()))
-                    .collect(Collectors.toList());
+            List<Utilisateur> developpeurs = utilisateurController.getUtilisateurs();
             for (Utilisateur developpeur : developpeurs) {
-                comboDeveloppeur.addItem(developpeur);
+                if (developpeur.getRole().equals("developpeur") && !developpeur.isEstSupprime()) {
+                    // Vérifier si le développeur a des incidents assignés
+                    List<Incident> incidentsAssignes = incidentController.getIncidentsAssignesADeveloppeur(developpeur.getId());
+                    if (incidentsAssignes.isEmpty()) {
+                        developpeurComboBox.addItem(developpeur);
+                    }
+                }
             }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erreur lors de la récupération des développeurs : " + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
-            dispose();
-            return;
+        } catch (SQLException | IOException ex) {
+            JOptionPane.showMessageDialog(this, "Erreur lors de la récupération des développeurs : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
-
-        JButton boutonAssigner = new JButton("Assigner");
-
-        // Ajout des composants au panneau
-        panneauPrincipal.add(labelIncident);
-        panneauPrincipal.add(comboIncident);
-        panneauPrincipal.add(labelDeveloppeur);
-        panneauPrincipal.add(comboDeveloppeur);
-        panneauPrincipal.add(new JLabel()); // Espace vide
-        panneauPrincipal.add(boutonAssigner);
-
-        // Gestion des événements
-        boutonAssigner.addActionListener(e -> {
-            Incident incidentSelectionne = (Incident) comboIncident.getSelectedItem();
-            Utilisateur developpeurSelectionne = (Utilisateur) comboDeveloppeur.getSelectedItem();
-
-            if (incidentSelectionne != null && developpeurSelectionne != null) {
-                incidentSelectionne.setAssigneA(developpeurSelectionne);
-                incidentController.updateIncident(incidentSelectionne);
-				JOptionPane.showMessageDialog(FenetreAssignationIncidentResponsable.this, "Incident assigné avec succès !");
-				dispose();
-            } else {
-                JOptionPane.showMessageDialog(FenetreAssignationIncidentResponsable.this, "Veuillez sélectionner un incident et un développeur.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        // Personnalisation de l'affichage des développeurs
+        developpeurComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Utilisateur) {
+                    Utilisateur developpeur = (Utilisateur) value;
+                    setText(developpeur.getNom()); // Afficher le nom du développeur
+                }
+                return this;
             }
         });
+        panneauPrincipal.add(developpeurComboBox);
 
+        // Incidents ouverts
+        panneauPrincipal.add(new JLabel("Incident :"));
+        incidentComboBox = new JComboBox<>();
+     // Dans FenetreAssignationIncidentResponsable.java
+        try {
+            List<Incident> incidents = incidentController.getIncidentsOuverts();
+            for (Incident incident : incidents) {
+                incidentComboBox.addItem(incident);
+            }
+        } catch (SQLException | IOException ex) {
+            JOptionPane.showMessageDialog(this, "Erreur lors de la récupération des incidents : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+        // Personnalisation de l'affichage des incidents
+        incidentComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Incident) {
+                    Incident incident = (Incident) value;
+                    setText(incident.getDescription()); // Remplacez getDescription() par l'attribut correct
+                }
+                return this;
+            }
+        });
+        panneauPrincipal.add(incidentComboBox);
+
+        // Bouton Assigner
+        JButton assignerButton = new JButton("Assigner");
+        assignerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                assignerIncident();
+            }
+        });
+        panneauPrincipal.add(assignerButton);
+
+        add(panneauPrincipal);
         setVisible(true);
+    }
+
+    private void assignerIncident() {
+        Utilisateur developpeur = (Utilisateur) developpeurComboBox.getSelectedItem();
+        Incident incident = (Incident) incidentComboBox.getSelectedItem();
+
+        try {
+            // Vérifier si l'incident est déjà assigné
+            List<Incident> incidentsAssignes = incidentController.getIncidentsAssignesADeveloppeur(developpeur.getId());
+            boolean dejaAssigne = false;
+            for (Incident incidentAssigne : incidentsAssignes) {
+                if (incidentAssigne.getId() == incident.getId()) {
+                    dejaAssigne = true;
+                    break;
+                }
+            }
+
+            if (dejaAssigne) {
+                JOptionPane.showMessageDialog(this, "Cet incident est déjà assigné à ce développeur.", "Information", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                // Assigner l'incident
+                incidentController.assignerIncidentADeveloppeur(incident.getId(), developpeur.getId());
+                // Récupérer l'utilisateur assigné depuis la base de données
+                Utilisateur utilisateurAssigne = utilisateurController.getUtilisateur(developpeur.getId());
+                incident.setAssigneA(utilisateurAssigne);
+                incident.setStatut(Statut.EN_COURS);
+
+                JOptionPane.showMessageDialog(this, "Incident assigné avec succès.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                dispose();
+            }
+        } catch (SQLException | IOException ex) {
+            JOptionPane.showMessageDialog(this, "Erreur lors de l'assignation de l'incident : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

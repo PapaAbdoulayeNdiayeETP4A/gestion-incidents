@@ -71,7 +71,9 @@ public class FenetreCreationUtilisateur extends JFrame {
         utilisateur.setMotDePasse(motDePasse);
         utilisateur.setRole(role);
 
-        utilisateurController.createUtilisateur(utilisateur);
+        // Créer l'utilisateur et récupérer l'ID généré
+        int utilisateurId = utilisateurController.createUtilisateur(utilisateur);
+        utilisateur.setId(utilisateurId); // Mettre à jour l'objet utilisateur avec l'ID
 		JOptionPane.showMessageDialog(this, "Utilisateur créé avec succès.");
 
 		// Open role-specific window

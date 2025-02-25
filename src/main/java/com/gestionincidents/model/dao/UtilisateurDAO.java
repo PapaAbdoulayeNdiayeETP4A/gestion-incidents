@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,21 +108,23 @@ public class UtilisateurDAO {
         return developpeurIds;
     }
 
-    public void createUtilisateur(Utilisateur utilisateur) throws SQLException, IOException {
-        Connection connexion = null;
-        try {
-            connexion = ConnexionBD.getConnection();
-            String sql = "INSERT INTO utilisateur (nom, email, mot_de_passe, role) VALUES (?, ?, ?, ?)";
-            PreparedStatement statement = connexion.prepareStatement(sql);
+    public int createUtilisateur(Utilisateur utilisateur) throws SQLException, IOException {
+        String sql = "INSERT INTO utilisateur (nom, email, mot_de_passe, role) VALUES (?, ?, ?, ?)";
+        try (Connection connexion = ConnexionBD.getConnection();
+             PreparedStatement statement = connexion.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) { // Récupérer les clés générées
             statement.setString(1, utilisateur.getNom());
             statement.setString(2, utilisateur.getEmail());
             statement.setString(3, utilisateur.getMotDePasse());
             statement.setString(4, utilisateur.getRole());
             statement.executeUpdate();
-            logger.info("Utilisateur créé : " + utilisateur.getNom());
-        } catch (SQLException | IOException e) {
-            logger.error("Erreur lors de la création de l'utilisateur : " + e.getMessage());
-            throw e;
+
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1); // Retourner l'ID généré
+                } else {
+                    throw new SQLException("La création de l'utilisateur a échoué, aucun ID généré.");
+                }
+            }
         }
     }
     
