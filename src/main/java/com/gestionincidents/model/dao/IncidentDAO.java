@@ -27,7 +27,7 @@ public class IncidentDAO {
     public List<Incident> getAllIncidents() throws SQLException {
         List<Incident> incidents = new ArrayList<>();
         String sql = "SELECT i.id, i.description, i.date_signalement, i.priorite, i.statut, " +
-                "a.nom AS application_nom, " +
+                "a.nom AS application_nom, a.id AS application_id, " +
                 "u_rapporteur.id AS rapporteur_id, u_rapporteur.nom AS rapporteur_nom, u_rapporteur.email AS rapporteur_email, u_rapporteur.role AS rapporteur_role, " +
                 "u_assigne.id AS assigne_id, u_assigne.nom AS assigne_nom, u_assigne.email AS assigne_email, u_assigne.role AS assigne_role " +
                 "FROM incident i " +
@@ -50,6 +50,7 @@ public class IncidentDAO {
                 incident.setStatut(Statut.valueOf(statutStr));
 
                 Application application = new Application();
+                application.setId(resultSet.getInt("application_id"));
                 application.setNom(resultSet.getString("application_nom"));
                 incident.setApplicationConcernee(application);
 
@@ -170,10 +171,11 @@ public class IncidentDAO {
     }
 
     public void assignerIncident(int incidentId, int developpeurId) throws SQLException {
-        String sql = "UPDATE incident SET assigne_a_id = ? WHERE id = ?";
+        String sql = "UPDATE incident SET statut = ?, assigne_a_id = ? WHERE id = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, developpeurId);
-            statement.setInt(2, incidentId);
+            statement.setString(1, "ASSIGNE");
+            statement.setInt(2, developpeurId);
+            statement.setInt(3, incidentId);
             statement.executeUpdate();
         }
     }
@@ -189,7 +191,7 @@ public class IncidentDAO {
     
     public List<Incident> getIncidentsOuverts() throws SQLException, IOException {
         List<Incident> incidents = new ArrayList<>();
-        String sql = "SELECT * FROM incident WHERE statut = 'OUVERT' AND assigne_a_id IS NULL";
+        String sql = "SELECT * FROM incident WHERE statut = 'RE_OUVERT' OR statut = 'NOUVEAU'";
         try (Connection connexion = ConnexionBD.getConnection();
              PreparedStatement statement = connexion.prepareStatement(sql);
              ResultSet resultat = statement.executeQuery()) {
@@ -197,6 +199,7 @@ public class IncidentDAO {
                 Incident incident = new Incident();
                 incident.setId(resultat.getInt("id"));
                 incident.setDescription(resultat.getString("description")); // Assurez vous que le nom de la collone est bon
+                incident.setStatut(Statut.valueOf(resultat.getString("statut")));
                 // ... (récupérer les autres champs)
                 incidents.add(incident);
             }
@@ -206,13 +209,14 @@ public class IncidentDAO {
 
 
     public void assignerIncidentADeveloppeur(int incidentId, int developpeurId) throws SQLException, IOException {
-        String query = "UPDATE incident SET assigne_a_id = ? WHERE id = ?";
+        String query = "UPDATE incident SET assigne_a_id = ?, statut = ? WHERE id = ?";
         
         try (Connection connection = ConnexionBD.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             
             statement.setInt(1, developpeurId);
-            statement.setInt(2, incidentId);
+            statement.setString(2, Statut.ASSIGNE.name());
+            statement.setInt(3, incidentId);
             statement.executeUpdate();
         }
     }

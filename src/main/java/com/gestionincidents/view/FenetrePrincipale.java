@@ -275,10 +275,7 @@ public class FenetrePrincipale extends JFrame {
             });
         } else if (utilisateur.getRole().equals("responsable")) {
             JButton boutonConsulterIncidents = creerBouton("Consulter les incidents");
-            JButton buttonAssignerIncident = creerBouton("Assigner un incident");
             panneauBoutons.add(boutonConsulterIncidents);
-            panneauBoutons.add(buttonAssignerIncident);
-            
             boutonConsulterIncidents.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -289,43 +286,7 @@ public class FenetrePrincipale extends JFrame {
                     }
                 }
             });
-            
-            buttonAssignerIncident.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    try {
-                        IncidentController incidentController = new IncidentController();
-                        UtilisateurController utilisateurController = new UtilisateurController();
-                        
-                        List<Utilisateur> developpeurs = utilisateurController.getUtilisateurs();
-                        List<Incident> incidents = incidentController.getIncidentsOuverts();
-                        
-                        boolean developpeurDisponible = developpeurs.stream()
-                            .filter(dev -> "developpeur".equals(dev.getRole()) && !dev.isEstSupprime())
-                            .anyMatch(dev -> {
-                                try {
-                                    return incidentController.getIncidentsAssignesADeveloppeur(dev.getId()).isEmpty();
-                                } catch (SQLException | IOException ex) {
-                                    ex.printStackTrace();
-                                    return false;
-                                }
-                            });
-                        
-                        boolean incidentDisponible =  incidents != null && !incidents.isEmpty();
-                        
-                        if (!developpeurDisponible || !incidentDisponible) {
-                            String message = "Aucun incident disponible ou tous les développeurs ont été assignés.";
-                            JOptionPane.showMessageDialog(null, message, "Erreur", JOptionPane.ERROR_MESSAGE);
-                            return;
-                        }
-                        
-                        new FenetreAssignationIncidentResponsable(incidentController, utilisateurController, utilisateur).setVisible(true);
-                        
-                    } catch (SQLException | IOException ex) {
-                        afficherErreur("Erreur d'ouverture", ex);
-                    }
-                }
-            });
+
         } else if (utilisateur.getRole().equals("administrateur")) {
             JButton boutonCreerUtilisateur = creerBouton("Créer un utilisateur");
             JButton rechercherUtilisateur = creerBouton("Rechercher utilisateur");

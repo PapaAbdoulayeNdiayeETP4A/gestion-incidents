@@ -173,4 +173,31 @@ public class ApplicationDAO {
             throw e;
         }
     }
+
+ // ApplicationDAO
+    public Application getApplicationsByEquipeId(int equipeId) throws SQLException, IOException {
+        String query = "SELECT * FROM application WHERE equipe_responsable_id = ?";
+        
+        try (PreparedStatement stmt = ConnexionBD.getConnection().prepareStatement(query)) {
+            stmt.setInt(1, equipeId);
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                Application application = new Application();
+                application.setId(rs.getInt("id"));
+                application.setNom(rs.getString("nom"));
+                application.setDescription(rs.getString("description"));
+                application.setVersion(rs.getString("version"));
+                EquipeDAO equipeDAO = new EquipeDAO();
+                Equipe equipe = equipeDAO.getEquipeById(rs.getInt("equipe_responsable_id"));
+                application.setEquipeResponsable(equipe);
+                return application;
+        }
+            return null;
+        } catch (SQLException e) {
+			logger.error("Erreur lors de la récupération de l'application par ID d'équipe " + equipeId + " : "
+					+ e.getMessage());
+			throw e;
+		}
+        }
 }

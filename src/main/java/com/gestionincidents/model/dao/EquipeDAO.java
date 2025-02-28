@@ -147,4 +147,23 @@ public class EquipeDAO {
         }
     }
 
+    public Equipe getEquipeByResponsableId(int responsableId) throws SQLException, IOException {
+        Equipe equipe = null;
+        String query = "SELECT * FROM equipe WHERE responsable_id = ?";
+        
+        try (PreparedStatement stmt = ConnexionBD.getConnection().prepareStatement(query)) {
+            stmt.setInt(1, responsableId);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                equipe = new Equipe();
+                equipe.setId(rs.getInt("id"));
+                equipe.setNom(rs.getString("nom"));
+                // Définir les autres propriétés de l'équipe selon votre modèle
+            }
+        }
+        
+        return equipe;
+    }
+
 }

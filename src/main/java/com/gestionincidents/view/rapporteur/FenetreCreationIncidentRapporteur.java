@@ -102,7 +102,7 @@ public class FenetreCreationIncidentRapporteur extends JFrame {
             incident.setDescription(description);
             incident.setDateCreation(LocalDateTime.now()); // Utilisation de LocalDateTime
             incident.setPriorite(priorite);
-            incident.setStatut(Statut.OUVERT);
+            incident.setStatut(Statut.NOUVEAU);
             incident.setRapporteur(rapporteur);
 
             incidentController.createIncident(incident);

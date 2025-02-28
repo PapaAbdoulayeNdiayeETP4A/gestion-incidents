@@ -2,10 +2,12 @@ package com.gestionincidents.model;
 
 public enum Statut {
 
-    OUVERT("Ouvert"),
-    EN_COURS("En cours"),
+    NOUVEAU("Nouveau"),
+    ASSIGNE("Assigné"),
+    EN_ATTENTE("En attente"),
     RESOLU("Résolu"),
-    CLOS("Clos");
+	RE_OUVERT("Réouvert"),
+	CLOTURE("Cloturé");
 
     private String libelle;
 
