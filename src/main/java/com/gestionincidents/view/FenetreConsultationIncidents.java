@@ -1,11 +1,18 @@
 package com.gestionincidents.view;
 
+import com.gestionincidents.controller.ApplicationController;
 import com.gestionincidents.controller.CommentaireController;
+import com.gestionincidents.controller.EquipeController;
 import com.gestionincidents.controller.IncidentController;
+import com.gestionincidents.controller.UtilisateurController;
+import com.gestionincidents.model.Application;
+import com.gestionincidents.model.Equipe;
 import com.gestionincidents.model.Incident;
+import com.gestionincidents.model.Statut;
 import com.gestionincidents.model.Utilisateur;
 import com.gestionincidents.model.dao.UtilisateurDAO;
 import com.gestionincidents.view.rapporteur.FenetreModificationIncidentRapporteur;
+import com.gestionincidents.view.responsable.FenetreAssignationIncidentResponsable;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -121,20 +128,42 @@ public class FenetreConsultationIncidents extends JFrame {
                         .filter(incident -> incident.getAssigneA() != null && incident.getAssigneA().getId() == utilisateur.getId())
                         .collect(Collectors.toList());
             case "responsable":
-                // Récupérer les ID des développeurs de l'équipe du responsable
-                UtilisateurDAO utilisateurDAO = new UtilisateurDAO();
                 try {
-                    List<Integer> developpeurIds = utilisateurDAO.getDeveloppeurIdsByResponsableId(utilisateur.getId());
+                    // Utiliser les controllers au lieu des DAO directs
+                    EquipeController equipeController = new EquipeController();
+                    ApplicationController applicationController = new ApplicationController();
+                    
+                    // Récupérer l'équipe dirigée par le responsable
+                    Equipe equipe = equipeController.getEquipeByResponsableId(utilisateur.getId());
+                    
+                    if (equipe == null) {
+                        JOptionPane.showMessageDialog(this, "Aucune équipe trouvée pour ce responsable.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        return new ArrayList<>();
+                    }
+                    
+                    // Récupérer l'application gérée par cette équipe
+                    Application application = applicationController.getApplicationsByEquipeId(equipe.getId());
+
+                    if (application == null) {
+                        JOptionPane.showMessageDialog(this, "Aucune application trouvée pour cette équipe.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        return new ArrayList<>();
+                    }
+                    
+                    // Filtrer les incidents qui concernent cette application
                     return incidents.stream()
-                            .filter(incident -> incident.getAssigneA() != null && developpeurIds.contains(incident.getAssigneA().getId()))
-                            .collect(Collectors.toList());
-                } catch (SQLException e) {
-                    JOptionPane.showMessageDialog(this, "Erreur lors de la récupération des développeurs de l'équipe : " + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
-                    return new ArrayList<>(); // Retourner une liste vide en cas d'erreur
+                        .filter(incident -> 
+                            incident.getApplicationConcernee() != null && incident.getApplicationConcernee().getId() == application.getId()
+                        )
+                        .collect(Collectors.toList());
+                } catch (SQLException | IOException e) {
+                    JOptionPane.showMessageDialog(this, "Erreur lors de la récupération des incidents de l'application : " 
+                        + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+                    return new ArrayList<>();
                 }
+
             default:
                 return incidents; // Afficher tous les incidents pour les autres rôles
-        }
+            }
     }
 
     public void mettreAJourTableau(List<Incident> incidents) {
@@ -143,13 +172,14 @@ public class FenetreConsultationIncidents extends JFrame {
             // Déterminer les colonnes à ajouter
             boolean modifierAutorise = utilisateur.getRole().equals("rapporteur");
             boolean changerStatutAutorise = utilisateur.getRole().equals("rapporteur") || utilisateur.getRole().equals("responsable") || utilisateur.getRole().equals("developpeur");
+            boolean assignerAutorise = utilisateur.getRole().equals("responsable");
 
             // Définir les noms de colonnes
             String[] colonnes;
-            if (modifierAutorise && changerStatutAutorise) {
+            if (changerStatutAutorise && assignerAutorise) {
+                colonnes = new String[]{"ID", "Application", "Description", "Priorité", "Statut", "Assigné à", "Commentaires", "Changer Statut", "Assigner"};
+            } else if (modifierAutorise && changerStatutAutorise) {
                 colonnes = new String[]{"ID", "Application", "Description", "Priorité", "Statut", "Assigné à", "Commentaires", "Modifier", "Changer Statut"};
-            } else if (modifierAutorise) {
-                colonnes = new String[]{"ID", "Application", "Description", "Priorité", "Statut", "Assigné à", "Commentaires", "Modifier"};
             } else if (changerStatutAutorise) {
                 colonnes = new String[]{"ID", "Application", "Description", "Priorité", "Statut", "Assigné à", "Commentaires", "Changer Statut"};
             } else {
@@ -160,7 +190,7 @@ public class FenetreConsultationIncidents extends JFrame {
 
             for (Incident incident : incidents) {
                 Object[] donnee;
-                if (modifierAutorise && changerStatutAutorise) {
+                if (changerStatutAutorise && assignerAutorise) {
                     donnee = new Object[]{
                             incident.getId(),
                             incident.getApplicationConcernee().getNom(),
@@ -169,46 +199,79 @@ public class FenetreConsultationIncidents extends JFrame {
                             incident.getStatut(),
                             incident.getAssigneA() != null ? incident.getAssigneA().getNom() : "Non assigné",
                             "Afficher/Ajouter",
-                            "Modifier",
-                            "Changer Statut"
-                    };
-                } else if (modifierAutorise) {
-                    donnee = new Object[]{
-                            incident.getId(),
-                            incident.getApplicationConcernee().getNom(),
-                            incident.getDescription(),
-                            incident.getPriorite(),
-                            incident.getStatut(),
-                            incident.getAssigneA() != null ? incident.getAssigneA().getNom() : "Non assigné",
-                            "Afficher/Ajouter",
-                            "Modifier"
-                    };
-                } else if (changerStatutAutorise) {
-                    donnee = new Object[]{
-                            incident.getId(),
-                            incident.getApplicationConcernee().getNom(),
-                            incident.getDescription(),
-                            incident.getPriorite(),
-                            incident.getStatut(),
-                            incident.getAssigneA() != null ? incident.getAssigneA().getNom() : "Non assigné",
-                            "Afficher/Ajouter",
-                            "Changer Statut"
-                    };
-                } else {
-                    donnee = new Object[]{
-                            incident.getId(),
-                            incident.getApplicationConcernee().getNom(),
-                            incident.getDescription(),
-                            incident.getPriorite(),
-                            incident.getStatut(),
-                            incident.getAssigneA() != null ? incident.getAssigneA().getNom() : "Non assigné",
-                            "Afficher/Ajouter"
-                    };
+                            "Changer Statut",
+                            "Assigner"
+                        };
+                    } else if (modifierAutorise) {
+                        donnee = new Object[]{
+                                incident.getId(),
+                                incident.getApplicationConcernee().getNom(),
+                                incident.getDescription(),
+                                incident.getPriorite(),
+                                incident.getStatut(),
+                                incident.getAssigneA() != null ? incident.getAssigneA().getNom() : "Non assigné",
+                                "Afficher/Ajouter",
+                                "Modifier",
+                                "Changer Statut"
+                        };
+                    } else if (changerStatutAutorise) {
+                        donnee = new Object[]{
+                                incident.getId(),
+                                incident.getApplicationConcernee().getNom(),
+                                incident.getDescription(),
+                                incident.getPriorite(),
+                                incident.getStatut(),
+                                incident.getAssigneA() != null ? incident.getAssigneA().getNom() : "Non assigné",
+                                "Afficher/Ajouter",
+                                "Changer Statut"
+                        };
+                    } else {
+                        donnee = new Object[]{
+                                incident.getId(),
+                                incident.getApplicationConcernee().getNom(),
+                                incident.getDescription(),
+                                incident.getPriorite(),
+                                incident.getStatut(),
+                                incident.getAssigneA() != null ? incident.getAssigneA().getNom() : "Non assigné",
+                                "Afficher/Ajouter"
+                        };
+                    }
+                    modeleTableau.addRow(donnee);
                 }
-                modeleTableau.addRow(donnee);
+
+                // Ajout du gestionnaire d'événements pour le bouton "Assigner"
+                tableauIncidents.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        int colonne = tableauIncidents.getSelectedColumn();
+                        int ligne = tableauIncidents.rowAtPoint(e.getPoint());
+                        if (ligne >= 0 && tableauIncidents.getColumnName(colonne).equals("Assigner") && utilisateur.getRole().equals("responsable")) {
+                            int incidentId = (int) modeleTableau.getValueAt(ligne, 0); // Récupérer l'ID de l'incident
+
+                            try {
+                                IncidentController incidentController = new IncidentController();
+                                UtilisateurController utilisateurController = new UtilisateurController();
+
+                                // Récupérer uniquement l'incident sélectionné
+                                Incident incident = incidentController.getIncident(incidentId);
+
+                                if (incident == null) {
+                                    JOptionPane.showMessageDialog(null, "Incident introuvable.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                                } else if (incident.getStatut() != Statut.NOUVEAU && incident.getStatut() != Statut.RE_OUVERT) {
+                                    JOptionPane.showMessageDialog(null, "Cet incident ne peut-être assigné ou ré-assigné.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                                } else {
+                                    new FenetreAssignationIncidentResponsable(incidentController, utilisateurController, utilisateur).setVisible(true);
+                                }
+                            } catch (SQLException | IOException ex) {
+                                ex.printStackTrace();
+                                JOptionPane.showMessageDialog(null, "Erreur d'ouverture : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    }
+                });
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Erreur lors de la mise à jour du tableau : " + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
             }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erreur lors de la mise à jour du tableau : " + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
-    }
 }

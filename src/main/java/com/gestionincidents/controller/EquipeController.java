@@ -59,4 +59,9 @@ public class EquipeController {
             logger.error("Erreur lors de la suppression de l'équipe " + id + " : " + e.getMessage());
         }
     }
+
+    public Equipe getEquipeByResponsableId(int responsableId) throws SQLException, IOException {
+        EquipeDAO equipeDAO = new EquipeDAO();
+        return equipeDAO.getEquipeByResponsableId(responsableId);
+    }
 }

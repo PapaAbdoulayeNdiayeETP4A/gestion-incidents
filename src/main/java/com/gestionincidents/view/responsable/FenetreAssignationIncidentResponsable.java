@@ -1,7 +1,11 @@
 package com.gestionincidents.view.responsable;
 
+import com.gestionincidents.controller.ApplicationController;
+import com.gestionincidents.controller.EquipeController;
 import com.gestionincidents.controller.IncidentController;
 import com.gestionincidents.controller.UtilisateurController;
+import com.gestionincidents.model.Application;
+import com.gestionincidents.model.Equipe;
 import com.gestionincidents.model.Incident;
 import com.gestionincidents.model.Utilisateur;
 import com.gestionincidents.model.Statut;
@@ -40,9 +44,7 @@ public class FenetreAssignationIncidentResponsable extends JFrame {
                 if (!developpeur.isEstSupprime()) {
                     // Vérifier si le développeur a des incidents assignés
                     List<Incident> incidentsAssignes = incidentController.getIncidentsAssignesADeveloppeur(developpeur.getId());
-                    if (incidentsAssignes.isEmpty()) {
                         developpeurComboBox.addItem(developpeur);
-                    }
                 }
             }
         } catch (SQLException | IOException ex) {
@@ -63,16 +65,36 @@ public class FenetreAssignationIncidentResponsable extends JFrame {
         });
         panneauPrincipal.add(developpeurComboBox);
 
-        // Incidents ouverts
+     // Incidents ouverts
         panneauPrincipal.add(new JLabel("Incident :"));
         incidentComboBox = new JComboBox<>();
+
         try {
-            List<Incident> incidents = incidentController.getIncidentsOuverts();
+            // Récupérer l'équipe du responsable
+            EquipeController equipeController = new EquipeController();
+            ApplicationController applicationController = new ApplicationController();
+            
+            Equipe equipe = equipeController.getEquipeByResponsableId(responsable.getId());
+            if (equipe == null) {
+                JOptionPane.showMessageDialog(this, "Aucune équipe trouvée pour ce responsable.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            
+            // Récupérer l'application gérée par cette équipe
+            Application application = applicationController.getApplicationsByEquipeId(equipe.getId());
+            if (application == null) {
+                JOptionPane.showMessageDialog(this, "Aucune application trouvée pour cette équipe.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            
+            // Récupérer les incidents ouverts et filtrer uniquement ceux de l'application concernée
+            List<Incident> incidents = incidentController.getIncidents();
             for (Incident incident : incidents) {
-                if (incident.getAssigneA() == null || incident.getAssigneA().getId() == 0) {  // Incidents non assignés
+                if (incident.getApplicationConcernee() != null && incident.getApplicationConcernee().getId() == application.getId()) {
                     incidentComboBox.addItem(incident);
                 }
             }
+
         } catch (SQLException | IOException ex) {
             JOptionPane.showMessageDialog(this, "Erreur lors de la récupération des incidents : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
@@ -89,7 +111,9 @@ public class FenetreAssignationIncidentResponsable extends JFrame {
                 return this;
             }
         });
+
         panneauPrincipal.add(incidentComboBox);
+
 
         // Bouton Assigner
         JButton assignerButton = new JButton("Assigner");
@@ -112,27 +136,17 @@ public class FenetreAssignationIncidentResponsable extends JFrame {
         try {
             // Vérifier si l'incident est déjà assigné
             List<Incident> incidentsAssignes = incidentController.getIncidentsAssignesADeveloppeur(developpeur.getId());
-            boolean dejaAssigne = false;
-            for (Incident incidentAssigne : incidentsAssignes) {
-                if (incidentAssigne.getId() == incident.getId()) {
-                    dejaAssigne = true;
-                    break;
-                }
-            }
+           
+            // Assigner l'incident
+            incidentController.assignerIncidentADeveloppeur(incident.getId(), developpeur.getId());
+            // Récupérer l'utilisateur assigné depuis la base de données
+            Utilisateur utilisateurAssigne = utilisateurController.getUtilisateur(developpeur.getId());
+            incident.setAssigneA(utilisateurAssigne);
+            incident.setStatut(Statut.ASSIGNE);
 
-            if (dejaAssigne) {
-                JOptionPane.showMessageDialog(this, "Cet incident est déjà assigné à ce développeur.", "Information", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                // Assigner l'incident
-                incidentController.assignerIncidentADeveloppeur(incident.getId(), developpeur.getId());
-                // Récupérer l'utilisateur assigné depuis la base de données
-                Utilisateur utilisateurAssigne = utilisateurController.getUtilisateur(developpeur.getId());
-                incident.setAssigneA(utilisateurAssigne);
-                incident.setStatut(Statut.EN_COURS);
-
-                JOptionPane.showMessageDialog(this, "Incident assigné avec succès.", "Information", JOptionPane.INFORMATION_MESSAGE);
-                dispose();
-            }
+            JOptionPane.showMessageDialog(this, "Incident assigné avec succès.", "Information", JOptionPane.INFORMATION_MESSAGE);
+            dispose();
+            
         } catch (SQLException | IOException ex) {
             JOptionPane.showMessageDialog(this, "Erreur lors de l'assignation de l'incident : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }

@@ -59,4 +59,10 @@ public class ApplicationController {
             logger.error("Erreur lors de la suppression de l'application " + nom + " : " + e.getMessage());
         }
     }
+
+    public Application getApplicationsByEquipeId(int equipeId) throws SQLException, IOException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        return applicationDAO.getApplicationsByEquipeId(equipeId);
+    }
+
 }

@@ -62,22 +62,4 @@ public class Application {
         this.equipeResponsable = equipeResponsable;
     }
 
-    // Méthodes pour les incidents (commentées car nous ne voulons pas les gérer dans Application)
-
-    // public List<Incident> getIncidents() {
-    //     return incidents;
-    // }
-
-    // public void setIncidents(List<Incident> incidents) {
-    //     this.incidents = incidents;
-    // }
-
-    // public void ajouterIncident(Incident incident) {
-    //     this.incidents.add(incident);
-    // }
-
-    // public void supprimerIncident(Incident incident) {
-    //     this.incidents.remove(incident);
-    // }
-
 }
