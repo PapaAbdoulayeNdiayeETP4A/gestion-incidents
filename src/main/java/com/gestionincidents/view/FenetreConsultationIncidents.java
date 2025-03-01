@@ -10,7 +10,6 @@ import com.gestionincidents.model.Equipe;
 import com.gestionincidents.model.Incident;
 import com.gestionincidents.model.Statut;
 import com.gestionincidents.model.Utilisateur;
-import com.gestionincidents.model.dao.UtilisateurDAO;
 import com.gestionincidents.view.rapporteur.FenetreModificationIncidentRapporteur;
 import com.gestionincidents.view.responsable.FenetreAssignationIncidentResponsable;
 
