@@ -70,21 +70,4 @@ public class Commentaire {
     public void setIncident(Incident incident) {
         this.incident = incident;
     }
-
-    // Gestion des fichiers commentée car gérée dans le DAO/Controller.
-    // public List<Fichier> getFichiers() {
-    //     return fichiers;
-    // }
-    //
-    // public void setFichiers(List<Fichier> fichiers) {
-    //     this.fichiers = fichiers;
-    // }
-    //
-    // public void ajouterFichier(Fichier fichier) {
-    //     this.fichiers.add(fichier);
-    // }
-    //
-    // public void supprimerFichier(Fichier fichier) {
-    //     this.fichiers.remove(fichier);
-    // }
 }
