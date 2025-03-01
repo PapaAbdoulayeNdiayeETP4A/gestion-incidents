@@ -92,7 +92,10 @@ public class FenetreConnexion extends JFrame {
         
         // Ajouter une image ou un logo stylisé (simulée ici avec un JPanel personnalisé)
         JPanel panneauLogo = new JPanel() {
-            @Override
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g.create();
