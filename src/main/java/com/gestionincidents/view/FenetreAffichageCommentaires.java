@@ -45,7 +45,7 @@ public class FenetreAffichageCommentaires extends JFrame {
     }
     
     private void configureWindow() {
-        setTitle("Commentaires de l'incident #" + incidentId);
+        setTitle("Commentaires de l'incident");
         setSize(700, 500);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -84,12 +84,12 @@ public class FenetreAffichageCommentaires extends JFrame {
         headerPanel.setBorder(new EmptyBorder(0, 0, 10, 0));
         
         JLabel titleLabel = new JLabel("Commentaires de l'incident #" + incidentId);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        titleLabel.setFont(new Font("Segoe UI Symbol", Font.BOLD, 20));
         titleLabel.setForeground(accentColor);
         headerPanel.add(titleLabel, BorderLayout.WEST);
         
         JLabel infoLabel = new JLabel("Cliquez sur 'Répondre' pour ajouter une réponse à un commentaire");
-        infoLabel.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        infoLabel.setFont(new Font("Segoe UI Symbol", Font.ITALIC, 12));
         infoLabel.setForeground(textColor);
         headerPanel.add(infoLabel, BorderLayout.SOUTH);
         
@@ -102,7 +102,7 @@ public class FenetreAffichageCommentaires extends JFrame {
         actionPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
         
         JButton newCommentButton = new JButton("Ajouter un commentaire");
-        newCommentButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        newCommentButton.setFont(new Font("Segoe UI Symbol", Font.BOLD, 14));
         newCommentButton.setBackground(accentColor);
         newCommentButton.setForeground(Color.WHITE);
         newCommentButton.setFocusPainted(false);
@@ -144,7 +144,7 @@ public class FenetreAffichageCommentaires extends JFrame {
         
         // Séparer les commentaires parents et les réponses
         for (Commentaire commentaire : commentaires) {
-            if (commentaire.getCommentaireParentId() == null) {
+            if (commentaire.getCommentaireParentId() == null || commentaire.getCommentaireParentId() == 0) {
                 parentComments.add(commentaire);
             } else {
                 // Ajouter la réponse à la liste des réponses du parent
@@ -174,7 +174,7 @@ public class FenetreAffichageCommentaires extends JFrame {
         
         if (commentsTree.isEmpty()) {
             JLabel emptyLabel = new JLabel("Aucun commentaire pour cet incident");
-            emptyLabel.setFont(new Font("Segoe UI", Font.ITALIC, 16));
+            emptyLabel.setFont(new Font("Segoe UI Symbol", Font.ITALIC, 16));
             emptyLabel.setForeground(textColor);
             emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             panneauCommentaires.add(Box.createVerticalGlue());
@@ -223,11 +223,19 @@ public class FenetreAffichageCommentaires extends JFrame {
                 BorderFactory.createEmptyBorder(10, 15, 10, 15)));
         card.setBackground(cardColor);
         
-        // Ajouter marge à gauche pour les réponses
         if (isResponse) {
+            JPanel iconPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+            iconPanel.setBackground(cardColor);
+            JLabel iconLabel = new JLabel("↳"); // Icône de réponse
+            iconLabel.setFont(new Font("Segoe UI Symbol", Font.BOLD, 16));
+            iconLabel.setForeground(accentColor);
+            iconPanel.add(iconLabel);
+            card.add(iconPanel, BorderLayout.WEST);
+
+            // Ajouter marge à gauche pour les réponses
             card.setBorder(BorderFactory.createCompoundBorder(
-                new EmptyBorder(0, 40, 0, 0),
-                card.getBorder()));
+                    new EmptyBorder(0, 20, 0, 0), // Marge réduite car l'icône prend de la place
+                    card.getBorder()));
         }
         
         // En-tête du commentaire
@@ -239,11 +247,11 @@ public class FenetreAffichageCommentaires extends JFrame {
         authorPanel.setBackground(cardColor);
         
         JLabel authorLabel = new JLabel(commentaire.getAuteur().getNom());
-        authorLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        authorLabel.setFont(new Font("Segoe UI Symbol", Font.BOLD, 14));
         authorLabel.setForeground(accentColor);
         
         JLabel dateLabel = new JLabel(" • " + formatDate(commentaire.getDate()));
-        dateLabel.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        dateLabel.setFont(new Font("Segoe UI Symbol", Font.ITALIC, 12));
         dateLabel.setForeground(new Color(120, 120, 120));
         
         authorPanel.add(authorLabel);
@@ -252,7 +260,7 @@ public class FenetreAffichageCommentaires extends JFrame {
         
         if (isResponse) {
             JLabel replyLabel = new JLabel("Réponse");
-            replyLabel.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+            replyLabel.setFont(new Font("Segoe UI Symbol", Font.ITALIC, 12));
             replyLabel.setForeground(new Color(120, 120, 120));
             headerPanel.add(replyLabel, BorderLayout.EAST);
         }
@@ -261,7 +269,7 @@ public class FenetreAffichageCommentaires extends JFrame {
         
         // Contenu du commentaire
         JTextArea contentArea = new JTextArea(commentaire.getContenu());
-        contentArea.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        contentArea.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 14));
         contentArea.setLineWrap(true);
         contentArea.setWrapStyleWord(true);
         contentArea.setEditable(false);
@@ -329,7 +337,7 @@ public class FenetreAffichageCommentaires extends JFrame {
     
     private JButton createStyledButton(String text) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        button.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 12));
         button.setBackground(Color.WHITE);
         button.setForeground(accentColor);
         button.setBorder(BorderFactory.createCompoundBorder(

@@ -2,6 +2,8 @@ package com.gestionincidents.controller;
 
 import com.gestionincidents.model.dao.CommentaireDAO;
 import com.gestionincidents.model.Commentaire;
+import com.gestionincidents.model.Incident;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -36,5 +38,9 @@ public class CommentaireController {
 
     public void createReponseCommentaire(Commentaire commentaire, int incidentId, int commentaireParentId) throws SQLException, IOException {
         commentaireDAO.createReponseCommentaire(commentaire, incidentId, commentaireParentId);
+    }
+    
+    public Incident getIncident(int incidentId) throws SQLException, IOException {
+        return commentaireDAO.getIncidentById(incidentId);
     }
 }

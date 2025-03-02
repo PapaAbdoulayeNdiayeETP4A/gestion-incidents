@@ -1,15 +1,11 @@
 package com.gestionincidents.view;
 
-import com.gestionincidents.controller.IncidentController;
 import com.gestionincidents.controller.UtilisateurController;
-import com.gestionincidents.model.Incident;
 import com.gestionincidents.model.Utilisateur;
 import com.gestionincidents.view.administrateur.FenetreCreationUtilisateur;
 import com.gestionincidents.view.administrateur.FenetreListeUtilisateurs;
 import com.gestionincidents.view.administrateur.FenetreRechercheUtilisateur;
 import com.gestionincidents.view.rapporteur.FenetreCreationIncidentRapporteur;
-import com.gestionincidents.view.responsable.FenetreAssignationIncidentResponsable;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -17,7 +13,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.List;
 
 
 public class FenetrePrincipale extends JFrame {
@@ -67,7 +62,10 @@ public class FenetrePrincipale extends JFrame {
         
         // Logo (bug dans cercle blanc)
         JPanel panneauLogo = new JPanel() {
-            @Override
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g.create();

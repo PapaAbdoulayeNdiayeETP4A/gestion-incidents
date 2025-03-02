@@ -82,8 +82,10 @@ CREATE TABLE commentaire (
     contenu TEXT,
     date DATETIME,
     auteur_id INT,
+    commentaire_parent_id INT,
     FOREIGN KEY (incident_id) REFERENCES incident(id),
-    FOREIGN KEY (auteur_id) REFERENCES utilisateur(id)
+    FOREIGN KEY (auteur_id) REFERENCES utilisateur(id),
+    FOREIGN KEY (commentaire_parent_id) REFERENCES commentaire(id)
 );
 
 -- Table fichier

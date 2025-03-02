@@ -20,8 +20,10 @@ public class FenetreCreationReponseCommentaire extends JFrame {
     private Color accentColor = new Color(70, 130, 180);
     private Color backgroundColor = new Color(245, 245, 245);
     private Color textColor = new Color(50, 50, 50);
+    private Incident incident;
     
     public FenetreCreationReponseCommentaire(int incidentId, int commentaireParentId, Utilisateur utilisateur, CommentaireController commentaireController) throws SQLException, IOException {
+    	this.incident = commentaireController.getIncident(incidentId);
         setTitle("Répondre au commentaire " + commentaireParentId);
         setSize(500, 300);
         setLocationRelativeTo(null);
