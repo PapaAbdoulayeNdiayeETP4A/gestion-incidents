@@ -1,6 +1,7 @@
 package com.gestionincidents.model.dao;
 
 import com.gestionincidents.model.Commentaire;
+import com.gestionincidents.model.Incident;
 import com.gestionincidents.model.Utilisateur;
 import com.gestionincidents.utils.ConnexionBD;
 import org.apache.logging.log4j.LogManager;
@@ -25,7 +26,7 @@ public class CommentaireDAO {
 
         try {
             connexion = ConnexionBD.getConnection();
-            String sql = "SELECT c.id, c.contenu, c.date, c.auteur_id, u.nom AS auteur_nom " +
+            String sql = "SELECT c.id, c.contenu, c.date, c.auteur_id, u.nom AS auteur_nom, c.commentaire_parent_id " +
                     "FROM commentaire c " +
                     "INNER JOIN utilisateur u ON c.auteur_id = u.id " +
                     "WHERE c.incident_id = ?";
@@ -47,6 +48,13 @@ public class CommentaireDAO {
                 auteur.setNom(resultat.getString("auteur_nom"));
                 commentaire.setAuteur(auteur);
 
+                int parentId = resultat.getInt("commentaire_parent_id");
+                if (resultat.wasNull()) { 
+                    commentaire.setCommentaireParentId(null); 
+                } else { 
+                    commentaire.setCommentaireParentId(parentId);
+                }
+
                 commentaires.add(commentaire);
             }
 
@@ -64,7 +72,7 @@ public class CommentaireDAO {
         Connection connexion = null;
         try {
             connexion = ConnexionBD.getConnection();
-            String sql = "SELECT c.id, c.contenu, c.date, c.auteur_id, u.nom AS auteur_nom " +
+            String sql = "SELECT c.id, c.contenu, c.date, c.auteur_id, c.commentaire_parent_id, u.nom AS auteur_nom " +
                     "FROM commentaire c " +
                     "INNER JOIN utilisateur u ON c.auteur_id = u.id " +
                     "WHERE c.id = ?";
@@ -85,6 +93,12 @@ public class CommentaireDAO {
                 auteur.setId(resultat.getInt("auteur_id"));
                 auteur.setNom(resultat.getString("auteur_nom"));
                 commentaire.setAuteur(auteur);
+                int parentId = resultat.getInt("commentaire_parent_id");
+                if (resultat.wasNull()) { 
+                    commentaire.setCommentaireParentId(null); 
+                } else { 
+                    commentaire.setCommentaireParentId(parentId);
+                }
 
                 return commentaire;
             } else {
@@ -118,12 +132,13 @@ public class CommentaireDAO {
         Connection connexion = null;
         try {
             connexion = ConnexionBD.getConnection();
-            String sql = "INSERT INTO commentaire (contenu, date, auteur_id, incident_id) VALUES (?, ?, ?, ?)";
+            String sql = "INSERT INTO commentaire (contenu, date, auteur_id, incident_id, commentaire_parent_id) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement statement = connexion.prepareStatement(sql);
             statement.setString(1, commentaire.getContenu());
             statement.setTimestamp(2, Timestamp.valueOf(commentaire.getDate()));
             statement.setInt(3, commentaire.getAuteur().getId());
             statement.setInt(4, incidentId);
+            statement.setInt(5, commentaireParentId); // Ajout de cette ligne
             statement.executeUpdate();
             logger.info("Réponse au commentaire créée pour l'incident " + incidentId);
         } catch (SQLException | IOException e) {
@@ -161,6 +176,29 @@ public class CommentaireDAO {
             logger.info("Commentaire supprimé : " + commentaireId);
         } catch (SQLException | IOException e) {
             logger.error("Erreur lors de la suppression du commentaire " + commentaireId + " : " + e.getMessage());
+            throw e;
+        }
+    }
+    
+    public Incident getIncidentById(int incidentId) throws SQLException, IOException {
+        Connection connexion = null;
+        try {
+            connexion = ConnexionBD.getConnection();
+            String sql = "SELECT * FROM incident WHERE id = ?";
+            PreparedStatement statement = connexion.prepareStatement(sql);
+            statement.setInt(1, incidentId);
+            ResultSet resultat = statement.executeQuery();
+
+            if (resultat.next()) {
+                Incident incident = new Incident();
+                incident.setId(resultat.getInt("id"));
+                // ... (autres champs de l'incident)
+                return incident;
+            } else {
+                return null;
+            }
+        } catch (SQLException | IOException e) {
+            logger.error("Erreur lors de la récupération de l'incident " + incidentId + " : " + e.getMessage());
             throw e;
         }
     }

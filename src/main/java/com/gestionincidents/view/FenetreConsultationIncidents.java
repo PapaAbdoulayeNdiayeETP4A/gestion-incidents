@@ -101,7 +101,7 @@ public class FenetreConsultationIncidents extends JFrame {
         
         // Titre avec icône
         JLabel titleLabel = new JLabel("Gestion des Incidents");
-        titleLabel.setFont(new Font("Segoe UI Symbol", Font.BOLD, 24));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         titleLabel.setForeground(accentColor);
         headerPanel.add(titleLabel, BorderLayout.WEST);
         
@@ -111,7 +111,7 @@ public class FenetreConsultationIncidents extends JFrame {
         
         // Filtre par statut
         JLabel filterLabel = new JLabel("Filtrer par: ");
-        filterLabel.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 14));
+        filterLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         searchPanel.add(filterLabel);
         
         String[] filterOptions = {"Tous", "Nouveau", "En cours", "Résolu", "Fermé", "Re-ouvert"};
@@ -144,7 +144,7 @@ public class FenetreConsultationIncidents extends JFrame {
         });
         
         JLabel searchIcon = new JLabel("🔍");
-        searchIcon.setFont(new Font("Segoe UI Symbol Symbol", Font.PLAIN, 14));
+        searchIcon.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 14));
         searchPanel.add(searchIcon);
         searchPanel.add(searchField);
         
@@ -158,7 +158,7 @@ public class FenetreConsultationIncidents extends JFrame {
         actionPanel.setBackground(backgroundColor);
         
         JButton createButton = new JButton("Nouveau Incident");
-        createButton.setFont(new Font("Segoe UI Symbol", Font.BOLD, 14));
+        createButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         createButton.setBackground(accentColor);
         createButton.setForeground(Color.WHITE);
         createButton.setFocusPainted(false);
@@ -210,7 +210,7 @@ public class FenetreConsultationIncidents extends JFrame {
         
         if (incidents.isEmpty()) {
             JLabel emptyLabel = new JLabel("Aucun incident correspondant aux critères");
-            emptyLabel.setFont(new Font("Segoe UI Symbol", Font.ITALIC, 16));
+            emptyLabel.setFont(new Font("Segoe UI", Font.ITALIC, 16));
             emptyLabel.setForeground(textColor);
             emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             panneauIncidents.add(Box.createVerticalGlue());
@@ -244,11 +244,11 @@ public class FenetreConsultationIncidents extends JFrame {
         idAppPanel.setBackground(Color.WHITE);
         
         JLabel idLabel = new JLabel("#" + incident.getId());
-        idLabel.setFont(new Font("Segoe UI Symbol", Font.BOLD, 14));
+        idLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         idLabel.setForeground(accentColor);
         
         JLabel appLabel = new JLabel(" | " + incident.getApplicationConcernee().getNom());
-        appLabel.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 14));
+        appLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         
         idAppPanel.add(idLabel);
         idAppPanel.add(appLabel);
@@ -259,7 +259,7 @@ public class FenetreConsultationIncidents extends JFrame {
         statusPanel.setBackground(Color.WHITE);
         
         JLabel statusLabel = new JLabel(incident.getStatut().toString());
-        statusLabel.setFont(new Font("Segoe UI Symbol", Font.BOLD, 12));
+        statusLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
         statusLabel.setForeground(Color.WHITE);
         statusLabel.setOpaque(true);
         statusLabel.setBorder(new EmptyBorder(3, 8, 3, 8));
@@ -286,7 +286,7 @@ public class FenetreConsultationIncidents extends JFrame {
         }
         
         JLabel priorityLabel = new JLabel(incident.getPriorite().toString());
-        priorityLabel.setFont(new Font("Segoe UI Symbol", Font.BOLD, 12));
+        priorityLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
         priorityLabel.setForeground(Color.WHITE);
         priorityLabel.setOpaque(true);
         priorityLabel.setBorder(new EmptyBorder(3, 8, 3, 8));
@@ -315,7 +315,7 @@ public class FenetreConsultationIncidents extends JFrame {
         
         // Description
         JTextArea descriptionArea = new JTextArea(incident.getDescription());
-        descriptionArea.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 14));
+        descriptionArea.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         descriptionArea.setLineWrap(true);
         descriptionArea.setWrapStyleWord(true);
         descriptionArea.setEditable(false);
