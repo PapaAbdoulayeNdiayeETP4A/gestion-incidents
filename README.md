@@ -54,7 +54,7 @@ git clone git@github.com:PapaAbdoulayeNdiayeETP4A/gestion-incidents.git
 3️⃣ **Configurez la base de données :**
 * Lancez **XAMPP** et démarrez **MySQL** et **Apache**.
 * Créez une base de données nommée `gestion_incidents` via **phpMyAdmin**.
-* Modifiez le fichier `src/main/resources/application.properties` :
+* Modifiez le fichier `application.properties dans src/main/resources/ et mettez y le contenu suivant` :
   ```properties
   spring.datasource.url=jdbc:mysql://localhost:3306/gestion_incidents
   spring.datasource.username=root
