@@ -6,7 +6,7 @@ VALUES
     ('Charlie Durand', 'charlie@example.com', 'password3', FALSE, 'rapporteur'),
     ('David Leroy', 'david@example.com', 'password4', FALSE, 'developpeur'),
     ('Emma Roussel', 'emma@example.com', 'password5', FALSE, 'rapporteur'),
-    ('François Morel', 'francois@example.com', 'password6', FALSE, 'responsable');
+    ('François Morel', 'francois@example.com', 'password6', FALSE, 'responsable'),
     ('Admin', 'admin@example.com', 'adminpass', FALSE, 'administrateur');
 
 -- Insertion des responsables
@@ -36,7 +36,7 @@ VALUES
 -- Insertion de l'administrateur dans la table correspondante
 INSERT INTO administrateur (utilisateur_id)
 VALUES 
-    (7)
+    (7);
 
 -- Insertion d’applications
 INSERT INTO application (nom, description, version, equipe_responsable_id)
